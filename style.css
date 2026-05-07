@@ -86,10 +86,23 @@ body {
     max-width: 900px;
     color: white;
     text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+    
+    /* === ФИКС ПРЫЖКОВ === */
+    min-height: 120px;        /* Резервируем место под текст */
+    display: flex;
+    align-items: center;      /* Центрируем текст внутри блока по вертикали */
+    justify-content: center;  /* И по горизонтали */
 }
 
 #choices {
     transition: opacity 1s ease-in-out;
+    
+    /* === ФИКС ПРЫЖКОВ === */
+    min-height: 60px;         /* Резервируем место под кнопки */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;          /* Если кнопок много — переносим на новую строку */
 }
 
 button {
@@ -142,6 +155,10 @@ button:hover {
     pointer-events: none;
     transition: opacity 2s ease-in-out, filter 0.4s ease, transform 0.4s ease;
 }
+/* Будильник — увеличенный размер */
+.floater[src*="alarm.png"] {
+    width: 600px !important;
+}
 
 /* Анимации движения */
 #floating-object-1 { animation: floatAnim1 75s infinite alternate ease-in-out; }
@@ -169,9 +186,9 @@ button:hover {
 }
 
 @keyframes floatAnim3 {
-    0% { transform: translate(-120%, -20%) rotate(-2deg); }
-    50% { transform: translate(180%, -70%) rotate(4deg); }
-    100% { transform: translate(80%, -50%) rotate(-2deg); }
+    0% { transform: translate(-80%, -20%) rotate(-2deg); }
+    50% { transform: translate(20%, -60%) rotate(4deg); }
+    100% { transform: translate(-40%, -40%) rotate(-2deg); }
 }
 
 /* --- ЖИВАЯ КАМЕРА --- */

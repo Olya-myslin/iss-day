@@ -119,9 +119,17 @@ const story = {
         background: 'url("images/fon.png")',
         floatingItems: ['images/food0.png'],
         options: [
-            { text: "Съесть кашу", nextScene: 'science', item: 1 }     
+            { text: "Съесть кашу", nextScene: 'after_breakfast', item: 1 }     
         ]
-    }
+    },
+    'after_breakfast': {
+    text: "Завтрак окончен.<br>Станция ждёт.",
+    background: 'url("images/tubik.png")',
+    showAlarm: false,
+    options: [
+        { text: "Приступить к задачам", nextScene: 'systems' }
+    ]
+}
     
 };
 

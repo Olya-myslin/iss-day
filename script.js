@@ -91,9 +91,9 @@ const story = {
         background: 'url("images/fon.png")',
         floatingItems: ['images/food1.png', 'images/food2.png', 'images/food3.png'],
         options: [
-            { text: "Консервы", nextScene: 'science', item: 1 },
-            { text: "Мороженое", nextScene: 'science', item: 2 },
-            { text: "Шоколад", nextScene: 'science', item: 3 }
+            { text: "Консервы", nextScene: 'after_cans', item: 1 },
+            { text: "Мороженое", nextScene: 'after_icecream', item: 2 },
+            { text: "Шоколад", nextScene: 'after_chocolate', item: 3 }
         ]
     },
     'systems': {
@@ -125,6 +125,30 @@ const story = {
     'after_breakfast': {
     text: "Завтрак окончен.<br>Станция ждёт.",
     background: 'url("images/tubik.png")',
+    showAlarm: false,
+    options: [
+        { text: "Приступить к задачам", nextScene: 'systems' }
+    ]
+},
+'after_cans': {
+    text: "Ничего лишнего. Только белок и калории.<br>Станция учит ценить простые решения.",
+    background: 'url("images/cans.png")',
+    showAlarm: false,
+    options: [
+        { text: "Приступить к задачам", nextScene: 'systems' }
+    ]
+},
+'after_icecream': {
+    text: "Сублимированное мороженое тает на языке.<br>Маленькая роскошь среди звёзд.<br>Завтрак окончен.",
+    background: 'url("images/icecream.png")',
+    showAlarm: false,
+    options: [
+        { text: "Приступить к задачам", nextScene: 'systems' }
+    ]
+},
+'after_chocolate': {
+    text: "Тёмный шоколад — лучший друг на орбите.<br>Заряд бодрости и кусочек Земли в одном.<br>Завтрак окончен.",
+    background: 'url("images/chocolate.png")',
     showAlarm: false,
     options: [
         { text: "Приступить к задачам", nextScene: 'systems' }

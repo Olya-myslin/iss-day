@@ -10,7 +10,7 @@ const gameText = document.getElementById('game-text');
 const choices = document.getElementById('choices');
 const startBtn = document.getElementById('start-button');
 const music = document.getElementById('bg-music');
-
+let readiness = 0; // Очки готовности
 // Находим все три летающих объекта
 const obj1 = document.getElementById('floating-object-1');
 const obj2 = document.getElementById('floating-object-2');
@@ -74,37 +74,37 @@ const story = {
         background: 'url("images/second.png")',
         showAlarm: false,
         options: [
-            { text: "Идти на завтрак", nextScene: 'breakfast_early' },
-            { text: "Проверить системы", nextScene: 'systems' }
-        ]
+    { text: "Идти на завтрак", nextScene: 'breakfast_early', readiness: 2 },
+    { text: "Проверить системы", nextScene: 'systems', readiness: 3 }
+]
     },
     'sleep_more': {
         text: "Ты закрываешь глаза еще на 10 минут.<br>Сон на орбите тягучий и странный.<br>Когда ты наконец просыпаешься, будильник давно смолк.",
         background: 'none',
         showAlarm: false,
         options: [
-            { text: "Поспешить на завтрак", nextScene: 'breakfast_late' }
-        ]
+    { text: "Поспешить на завтрак", nextScene: 'breakfast_late', readiness: 0 }
+]
     },
     'breakfast_early': {
         text: "Ты пришел вовремя. У тебя есть возможноть<br>выбрать что ты хочешь на завтрак.",
         background: 'url("images/fon.png")',
         floatingItems: ['images/food1.png', 'images/food2.png', 'images/food3.png'],
         options: [
-            { text: "Консервы", nextScene: 'after_cans', item: 1 },
-            { text: "Мороженое", nextScene: 'after_icecream', item: 2 },
-            { text: "Шоколад", nextScene: 'after_chocolate', item: 3 }
-        ]
+    { text: "Консервы", nextScene: 'after_cans', item: 1, readiness: 2 },
+    { text: "Мороженое", nextScene: 'after_icecream', item: 2, readiness: 2 },
+    { text: "Шоколад", nextScene: 'after_chocolate', item: 3, readiness: 2 }
+]
     },
     'systems': {
     text: "Терминал активен.<br>Бортовой компьютер ожидает подтверждения<br>калибровки спектрометра.",
     background: 'url("images/control.png")',
     showAlarm: false,
     options: [
-        { text: "Полная калибровка", nextScene: 'calibration_full' },
-        { text: "Быстрая калибровка", nextScene: 'calibration_fast' },
-        { text: "Посмотреть в иллюминатор", nextScene: 'window_view', customClass: 'window-btn' }
-    ]
+    { text: "Полная калибровка", nextScene: 'calibration_full', readiness: 4 },
+    { text: "Быстрая калибровка", nextScene: 'calibration_fast', readiness: 1 },
+    { text: "Посмотреть в иллюминатор", nextScene: 'window_view', customClass: 'window-btn', readiness: 1 }
+]
 },
 'window_view': {
     text: "Ты фиксируешься у иллюминатора.<br>Орбитальная скорость — 7,66 км/с.<br>Под станцией проходит побережье.<br>До следующего витка — 92 минуты.",
@@ -119,8 +119,8 @@ const story = {
         background: 'url("images/fon.png")',
         floatingItems: ['images/food0.png'],
         options: [
-            { text: "Съесть кашу", nextScene: 'after_breakfast', item: 1 }     
-        ]
+    { text: "Съесть кашу", nextScene: 'after_breakfast', item: 1, readiness: 1 }     
+]
     },
     'after_breakfast': {
     text: "Завтрак окончен.<br>Станция ждёт.",
@@ -157,9 +157,7 @@ const story = {
     
 };
 
-// =======================================================
 // 7. ФУНКЦИЯ СМЕНЫ СЦЕНЫ (Render)
-// =======================================================
 function renderScene(sceneKey) {
     const scene = story[sceneKey];
     if (!scene) return;
@@ -219,7 +217,10 @@ function renderScene(sceneKey) {
 
                         btn.onclick = () => {
     playClickSound();
-
+    // Начисляем очки, если они прописаны в опции
+    if (opt.readiness) {
+        updateReadiness(opt.readiness);
+    }
     // --- ПОЛНАЯ КАЛИБРОВКА ---
     if (opt.nextScene === 'calibration_full') {
         startCalibration('full');
@@ -588,7 +589,7 @@ function finishCalibration(module) {
 // 8. СТАРТ ИГРЫ
 startBtn.addEventListener('click', () => {
     playClickSound();
-    
+    createHUD();
     // Музыка
     music.volume = 0; music.play();
     let fadeInMusic = setInterval(() => {
@@ -600,13 +601,38 @@ startBtn.addEventListener('click', () => {
     gameContainer.style.opacity = '0';
     starLayer.style.opacity = '0';
     bg.style.opacity = '0';
+    // Функция создания HUD
+function createHUD() {
+    const hud = document.createElement('div');
+    hud.id = 'hud-status';
+    hud.innerHTML = `
+        <svg class="hud-svg" viewBox="0 0 220 60">
+            <rect class="hud-rect" x="0" y="0" width="220" height="60"></rect>
+        </svg>
+        <div class="hud-content">
+            <div id="hud-readiness">READINESS: 00</div>
+            <div id="hud-state">STATUS: NORMAL</div>
+        </div>
+    `;
+    document.body.appendChild(hud);
+
+    // Анимация появления (как в калибровке)
+    setTimeout(() => {
+        hud.style.opacity = '1';
+        const rect = hud.querySelector('.hud-rect');
+        const content = hud.querySelector('.hud-content');
+        rect.style.strokeDashoffset = '0'; // Рисуем рамку
+        setTimeout(() => {
+         hud.classList.add('visible')
+        }, 1000);
+    }, 500);
+}
 
     setTimeout(() => {
         // --- ПОДГОТОВКА ВТОРОГО СЛАЙДА (В ТЕМНОТЕ) ---
         startTitle.style.display = 'none';
         starLayer.style.display = 'none';
         
-        // ★★★ ВОТ ЭТА СТРОЧКА ИСПРАВИТ БАГ ★★★
         // Стираем кнопку "Начать", пока экран черный
         choices.innerHTML = ""; 
         choices.style.opacity = '0';
@@ -628,11 +654,18 @@ startBtn.addEventListener('click', () => {
             
             typeWriter(intro, gameText, 40, () => {
                 setTimeout(() => {
-                    // Теперь здесь создаются НОВЫЕ кнопки
-                    choices.innerHTML = `<button id="w">Встать на смену</button><button id="s">Спать дальше</button>`;
-                    
-                    document.getElementById('w').onclick = () => { playClickSound(); renderScene('wake_up'); };
-                    document.getElementById('s').onclick = () => { playClickSound(); renderScene('sleep_more'); };
+                choices.innerHTML = `<button id="w">Встать на смену</button><button id="s">Спать дальше</button>`;
+
+document.getElementById('w').onclick = () => { 
+    playClickSound(); 
+    updateReadiness(3); // +3 за раннее пробуждение
+    renderScene('wake_up'); 
+};
+document.getElementById('s').onclick = () => { 
+    playClickSound(); 
+    updateReadiness(0); // 0 за то, что поспал
+    renderScene('sleep_more'); 
+};
                     
                     choices.style.opacity = '1';
                 }, 1000);
@@ -640,3 +673,28 @@ startBtn.addEventListener('click', () => {
         }, 100);
     }, 2000);
 });
+function updateReadiness(points) {
+    if (points === 0) return; // Если 0, ничего не делаем
+
+    readiness += points;
+    const readinessEl = document.getElementById('hud-readiness');
+    const stateEl = document.getElementById('hud-state');
+    const hud = document.getElementById('hud-status');
+
+    if (!readinessEl) return;
+
+    // Обновляем текст
+    readinessEl.textContent = `READINESS: ${String(readiness).padStart(2, '0')}`;
+    
+    // Обновляем статус
+    let statusText = "NORMAL";
+    if (readiness >= 12) statusText = "ELITE";
+    else if (readiness >= 8) statusText = "OPTIMAL";
+    else if (readiness < 4) statusText = "WEAK";
+    stateEl.textContent = `STATUS: ${statusText}`;
+
+    // Запускаем пульсацию
+    hud.classList.remove('pulse-active');
+    void hud.offsetWidth; // Магия для перезапуска анимации
+    hud.classList.add('pulse-active');
+}

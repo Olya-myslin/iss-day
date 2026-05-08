@@ -9,9 +9,15 @@
 </head>
 <body>
     <audio id="bg-music" src="audio/music.mp3" loop></audio>
+
     <div class="background" id="bg"></div>
     <div class="stars" id="star-layer"></div>
     <div class="overlay"></div>
+
+    <!-- Часы теперь отдельно, НЕ внутри game-container -->
+    <div class="time">
+        <span id="hours">00</span><span id="colon">:</span><span id="minutes">00</span> UTC
+    </div>
     
     <img id="floating-object-1" class="floater" src="images/alarm.png" alt="item1" style="display: none; opacity: 0;">
     <img id="floating-object-2" class="floater" src="" alt="item2" style="display: none; opacity: 0;">
@@ -19,19 +25,17 @@
     
     <div class="content">
         <div id="game-container">
-            <div class="time">
-                <span id="hours">00</span><span id="colon">:</span><span id="minutes">00</span> UTC
-            </div>
             
             <!-- Заголовок в две строки -->
             <h1 id="start-title">ОДИН ДЕНЬ<br>НА МКС</h1>
 
-            <!-- Текст для игры (скрыт) -->
+            <!-- Текст для игры -->
             <div id="game-text" style="display: none;"></div>
             
             <div id="choices">
                 <button id="start-button">НАЧАТЬ ПЕРВЫЙ ДЕНЬ</button>
             </div>
+
         </div>
     </div>
 

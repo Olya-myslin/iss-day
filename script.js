@@ -65,17 +65,15 @@ function typeWriter(text, element, speed, callback) {
     type();
 }
 
-// =======================================================
 // 6. СЦЕНАРИЙ ИГРЫ (Story)
-// =======================================================
 const story = {
     'wake_up': {
         text: "Ты решительно выплываешь из спального мешка.<br>Тело кажется неестественно легким.<br>В каюте пахнет озоном и сублимированным кофе.<br>Пора браться за работу.",
         background: 'url("images/second.png")',
         showAlarm: false,
         options: [
-    { text: "Идти на завтрак", nextScene: 'breakfast_early', readiness: 2 },
-    { text: "Проверить системы", nextScene: 'systems', readiness: 3 }
+    { text: "Идти на завтрак", nextScene: 'breakfast_early' },
+    { text: "Проверить системы", nextScene: 'systems' }
 ]
     },
     'sleep_more': {
@@ -83,7 +81,7 @@ const story = {
         background: 'none',
         showAlarm: false,
         options: [
-    { text: "Поспешить на завтрак", nextScene: 'breakfast_late', readiness: 0 }
+    { text: "Поспешить на завтрак", nextScene: 'breakfast_late' }
 ]
     },
     'breakfast_early': {
@@ -153,6 +151,86 @@ const story = {
     options: [
         { text: "Приступить к задачам", nextScene: 'systems' }
     ]
+},
+'hydroponics': {
+    text: "В модуле «Кибо» тихо гудят лампы.<br>Вокруг корней одного салата<br>висит идеальная сфера воды.<br>Лист побледнел. Панель мигает: ABNORMAL LEAF.",
+    background: 'url("images/hydroponics.png")',
+    showAlarm: false,
+    options: [
+        { text: "Стравить пузырь", nextScene: 'hydro_fix', readiness: 3 },
+        { text: "Скорректировать pH", nextScene: 'hydro_ph', readiness: 1 },
+        { text: "Изолировать растение", nextScene: 'hydro_isolate', readiness: 1 }
+    ]
+},
+'hydro_fix': {
+    text: "Ты аккуратно подводишь шприц к сфере.<br>Пузырьки воздуха уходят один за другим.<br>Раствор снова потёк ровно. Лист ещё бледный,<br>но корни уже дышат.",
+    background: 'url("images/fix.png")',
+    showAlarm: false,
+    options: [
+        { text: "Продолжить день", nextScene: 'corridor' }
+    ]
+},
+
+'hydro_ph': {
+    text: "Ты вводишь корректор в раствор.<br>Показатели выравниваются, лист слегка расправляется.<br>Но сфера воды всё ещё висит вокруг корней.<br>Это ненадолго.",
+    background: 'url("images/ydro.png")',
+    showAlarm: false,
+    options: [
+        { text: "Продолжить день", nextScene: 'corridor' }
+    ]
+},
+
+'hydro_isolate': {
+    text: "Ты отключаешь секцию 04 от общего контура.<br>Лампа над ней гаснет.<br>Остальные растения в безопасности.<br>В отсеке стало чуть тише.",
+    background: 'url("images/isolate.png")',
+    showAlarm: false,
+    options: [
+        { text: "Продолжить день", nextScene: 'corridor' }
+    ]
+},
+'corridor': {
+    text: "Ты толкаешься от поручня и плывёшь обратно по модулю.<br>Узкий коридор тянется метров на двадцать.<br>Лампы мерцают мягко, кабели вдоль стен слегка покачиваются.<br>Тишина. Только гул вентиляции.",
+    background: 'url("images/second.png")',
+    showAlarm: false,
+    options: [],
+    triggerAlert: true   // После печати текста запустится тревога
+},
+
+// --- ЗАГЛУШКИ для финальных сцен ---
+'eva_prep_stub': {
+    text: "(Здесь будет сцена подготовки скафандра и выхода в открытый космос)",
+    background: 'none',
+    showAlarm: false,
+    options: []
+},
+
+'coordination_stub': {
+    text: "(Здесь будет сцена координации Алекса из модуля управления)",
+    background: 'none',
+    showAlarm: false,
+    options: []
+},
+'after_postpone': {
+    text: "Ты заканчиваешь оформлять отчёт по калибровке.<br>Через двадцать минут добираешься до гидропоники.<br>Растение всё ещё держится, но видно — было ближе к критической точке, чем хотелось бы.<br>\"Чуть позже было бы поздно. Но спасибо.\"",
+    background: 'url("images/control.png")',
+    showAlarm: false,
+    options: [
+        { text: "Продолжить день", nextScene: 'quiet_moment' }
+    ]
+},
+'after_refuse': {
+    text: "\"Понял. Гляну сам, когда смогу.\"<br>Голос в наушниках звучит ровно, но ты слышишь в нём лёгкую усталость.<br>Через час по системе приходит уведомление:<br>\"Растение пришлось списать. Не страшно, но обидно.\"",
+    background: 'url("images/control.png")',
+    showAlarm: false,
+    options: [
+        { text: "Продолжить день", nextScene: 'quiet_moment' }
+    ]
+},
+'quiet_moment': {
+    text: "Ты возвращаешься к терминалу.<br>День идёт своим чередом.<br><br>(Эта сцена — заглушка, дальше будет продолжение сюжета)",
+    background: 'url("images/control.png")',
+    showAlarm: false,
+    options: []
 }
     
 };
@@ -206,6 +284,13 @@ function renderScene(sceneKey) {
             // ШАГ 4: ПЕЧАТЬ ТЕКСТА
             setTimeout(() => {
                 typeWriter(scene.text, gameText, 30, () => {
+                    //--- ЗАПУСК АВАРИЙНОГО УВЕДОМЛЕНИЯ ---
+                    if (scene.triggerAlert) {
+                        setTimeout(() => {
+                            showAlertNotification();
+                        }, 1500);
+                    }
+
                     // Создаем кнопки
                     scene.options.forEach(opt => {
                         const btn = document.createElement('button');
@@ -579,11 +664,17 @@ function finishCalibration(module) {
         gameText.style.opacity = "1";
         choices.style.opacity = "1";
 
-        gameText.innerHTML = "Калибровка завершена.<br>Параметры в пределах нормы.";
+        // Очищаем текст и кнопки перед печатью
+        gameText.innerHTML = "";
+        choices.innerHTML = "";
 
-        choices.innerHTML = `
-            <button onclick="renderScene('systems')">Вернуться к панели</button>
-        `;
+        // Печатаем текст с эффектом typeWriter
+        typeWriter("Калибровка завершена.<br>Отчёт ушёл на Землю.", gameText, 40, () => {
+            // Через 2 секунды после окончания печати — показываем сообщение от коллеги
+            setTimeout(() => {
+                showCrewMessage();
+            }, 2000);
+        });
     };
 }
 // 8. СТАРТ ИГРЫ
@@ -697,4 +788,198 @@ function updateReadiness(points) {
     hud.classList.remove('pulse-active');
     void hud.offsetWidth; // Магия для перезапуска анимации
     hud.classList.add('pulse-active');
+}
+// СООБЩЕНИЕ ОТ КОЛЛЕГИ (внутренняя связь)
+function showCrewMessage() {
+
+    // Воспроизводим звук уведомления
+    const notificationSound = new Audio('audio/notification.mp3');
+    notificationSound.volume = 0.5;
+    notificationSound.play();
+
+    // Создаём контейнер сообщения
+    const message = document.createElement("div");
+    message.classList.add("crew-message");
+    
+    message.innerHTML = `
+        <div class="crew-header">◉ ВНУТРЕННЯЯ СВЯЗЬ</div>
+        <div class="crew-body">
+            "Слушай, у меня тут одно из растений в гидропонике странно себя ведёт.<br>
+            Сможешь глянуть, когда будет минута?"
+        </div>
+        <div class="crew-signature">— Алекс, модуль «Кибо»</div>
+        <div class="crew-choices"></div>
+    `;
+    
+    document.body.appendChild(message);
+    
+    // Плавное появление
+    setTimeout(() => {
+        message.classList.add("visible");
+    }, 50);
+    
+    // Через 1.5 секунды после появления — добавляем кнопки
+    setTimeout(() => {
+        const choicesBox = message.querySelector(".crew-choices");
+        
+        const options = [
+            { text: "Идти к гидропонике", scene: "hydroponics", readiness: 2 },
+            { text: "Сначала закончить свои задачи", scene: "after_postpone", readiness: 1 },
+            { text: "Сказать, что занят", scene: "after_refuse", readiness: 0 }
+        ];
+        
+        options.forEach(opt => {
+            const btn = document.createElement("button");
+            btn.textContent = opt.text;
+            btn.onclick = () => {
+                playClickSound();
+                if (opt.readiness) updateReadiness(opt.readiness);
+                
+                // Плавное исчезновение сообщения
+                message.classList.remove("visible");
+                setTimeout(() => {
+                    message.remove();
+                    renderScene(opt.scene);
+                }, 800);
+            };
+            choicesBox.appendChild(btn);
+        });
+    }, 1500);
+}
+// === АВАРИЙНОЕ УВЕДОМЛЕНИЕ ПОД HUD ===
+function showAlertNotification() {
+    // Воспроизводим звук уведомления (тот же, что у Алекса)
+    const notificationSound = new Audio('audio/notification.mp3');
+    notificationSound.volume = 0.5;
+    notificationSound.play();
+
+    // Создаём красное уведомление
+    const alert = document.createElement('div');
+    alert.id = 'alert-notification';
+    alert.innerHTML = `<span>⚠</span><span>АВАРИЙНЫЙ КАНАЛ</span>`;
+    document.body.appendChild(alert);
+
+    // Плавное появление + пульсация
+    setTimeout(() => {
+        alert.classList.add('visible');
+    }, 50);
+
+    // По клику — открываем красное окно
+    alert.onclick = () => {
+        playClickSound();
+        alert.remove();
+        showAlertMessage();
+    };
+}
+
+// === КРАСНОЕ ОКНО АВАРИЙНОГО СООБЩЕНИЯ + ДИАЛОГ С ЦУПом ===
+function showAlertMessage() {
+    const message = document.createElement('div');
+    message.classList.add('alert-message');
+
+    message.innerHTML = `
+        <div class="alert-header">⚠ АВАРИЙНЫЙ КАНАЛ — ВНЕШНЯЯ ОБШИВКА</div>
+        <div class="alert-body" id="alert-text"></div>
+        <div class="alert-choices" id="alert-buttons"></div>
+    `;
+
+    document.body.appendChild(message);
+
+    setTimeout(() => {
+        message.classList.add('visible');
+    }, 50);
+
+    const textBox = message.querySelector('#alert-text');
+    const buttonsBox = message.querySelector('#alert-buttons');
+
+    // === ВСЕ РЕПЛИКИ ДИАЛОГА ===
+    const dialog = [
+        {
+            text: "Зафиксировано повреждение антенны S-диапазона<br>на ферме P3. Кабель оторван, болтается в вакууме.<br>Связь с Землёй частично потеряна.<br><br>Требуется решение по EVA — выходу в открытый космос.",
+            button: "СВЯЗАТЬСЯ С ЗЕМЛЁЙ"
+        },
+        {
+            text: "— МКС, это Центр управления. Видим вашу телеметрию.<br>Подтверждаем повреждение антенны.<br>Готовим вам процедуру EVA.",
+            button: "СЛУШАТЬ"
+        },
+        {
+            text: "— Анализируем ваши показатели за смену.<br>Биоритмы, концентрация, скорость задач...<br>Минуту, командир.",
+            button: "ЖДАТЬ"
+        }
+        // Последняя реплика добавится динамически — в зависимости от очков
+    ];
+
+    let step = 0;
+
+    function showStep() {
+        // Убираем старую кнопку
+        buttonsBox.innerHTML = "";
+        textBox.innerHTML = "";
+
+        // Меняем заголовок на "ЦУП", когда начинается диалог с Землёй
+        if (step >= 1) {
+            message.querySelector('.alert-header').innerHTML = "◉ КАНАЛ ЦУП — ОТКРЫТЫЙ ЭФИР";
+        }
+
+        // Печатаем текст реплики
+        typeWriter(dialog[step].text, textBox, 25, () => {
+            // После окончания печати — добавляем кнопку
+            const btn = document.createElement('button');
+            btn.textContent = dialog[step].button;
+            btn.classList.add('appearing');
+
+            btn.onclick = () => {
+                playClickSound();
+                step++;
+
+                // Если это была последняя реплика "Минуту, командир..." —
+                // показываем финальный вердикт
+                if (step === dialog.length) {
+                    showFinalVerdict();
+                } else {
+                    showStep();
+                }
+            };
+
+            buttonsBox.appendChild(btn);
+        });
+    }
+
+    // === ФИНАЛЬНЫЙ ВЕРДИКТ ЦУПа ===
+    function showFinalVerdict() {
+        buttonsBox.innerHTML = "";
+        textBox.innerHTML = "";
+
+        let finalText, finalBtn, nextScene;
+
+        if (readiness >= 8) {
+            finalText = "— Командир, телеметрия чистая.<br>Вы сегодня работали собранно и без срывов.<br>Подтверждаем ваш выход. Алекс — на подстраховке внутри.<br>Начинайте подготовку скафандра.";
+            finalBtn = "ПРИНЯТЬ КОМАНДУ";
+            nextScene = 'eva_prep_stub';
+        } else {
+            finalText = "— Командир, по данным за смену видим<br>повышенный пульс и накопленную усталость.<br>Риск слишком высокий. На внешнюю обшивку идёт Алекс.<br>Вы координируете его изнутри.";
+            finalBtn = "ПРИНЯТО";
+            nextScene = 'coordination_stub';
+        }
+
+        typeWriter(finalText, textBox, 25, () => {
+            const btn = document.createElement('button');
+            btn.textContent = finalBtn;
+            btn.classList.add('appearing');
+
+            btn.onclick = () => {
+                playClickSound();
+                message.classList.remove('visible');
+                setTimeout(() => {
+                    message.remove();
+                    renderScene(nextScene);
+                }, 800);
+            };
+
+            buttonsBox.appendChild(btn);
+        });
+    }
+
+    // Запускаем первую реплику
+    showStep();
 }

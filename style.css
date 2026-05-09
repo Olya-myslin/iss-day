@@ -86,12 +86,16 @@ body {
     max-width: 900px;
     color: white;
     text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
-    
+    text-align: center;
+
     /* === ФИКС ПРЫЖКОВ === */
-    min-height: 120px;        /* Резервируем место под текст */
+    min-height: 120px;
+    margin-left: auto;
+    margin-right: auto;
     display: flex;
-    align-items: center;      /* Центрируем текст внутри блока по вертикали */
-    justify-content: center;  /* И по горизонтали */
+    flex-direction: column;   /* строки текста идут друг под другом */
+    align-items: center;      /* центрируем по горизонтали */
+    justify-content: center;  /* и по вертикали */
 }
 
 #choices {
@@ -380,4 +384,210 @@ button:hover {
 
 .pulse-active {
     animation: hud-pulse 0.6s ease-out;
+}
+
+/* СООБЩЕНИЕ ОТ КОЛЛЕГИ (внутренняя связь) */
+.crew-message {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.95);
+    width: 520px;
+    max-width: 90vw;
+    padding: 30px 35px;
+    
+    background: rgba(10, 15, 25, 0.7);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    
+    font-family: monospace;
+    color: rgba(255, 255, 255, 0.85);
+    
+    z-index: 200;
+    
+    opacity: 0;
+    transition: opacity 0.8s ease, transform 0.8s ease;
+    
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+}
+
+.crew-message.visible {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+}
+
+.crew-header {
+    font-size: 12px;
+    letter-spacing: 3px;
+    color: rgba(255, 255, 255, 0.6);
+    margin-bottom: 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    padding-bottom: 10px;
+}
+
+.crew-body {
+    font-size: 15px;
+    line-height: 1.5;
+    margin-bottom: 15px;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.crew-signature {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.5);
+    text-align: right;
+    margin-bottom: 25px;
+    font-style: italic;
+}
+
+.crew-choices {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-height: 150px;  
+}
+
+.crew-choices button {
+    padding: 12px 20px;
+    font-size: 12px;
+    letter-spacing: 2px;
+    margin: 0;
+    width: 100%;
+    
+    /* Плавное появление */
+    opacity: 0;
+    animation: fadeInButton 0.8s ease forwards;
+}
+
+/* Каждая следующая кнопка появляется чуть позже */
+.crew-choices button:nth-child(1) { animation-delay: 0s; }
+.crew-choices button:nth-child(2) { animation-delay: 0.2s; }
+.crew-choices button:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes fadeInButton {
+    from { 
+        opacity: 0;
+        transform: translateY(5px);
+    }
+    to { 
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+/* --- АВАРИЙНОЕ УВЕДОМЛЕНИЕ ПОД HUD --- */
+#alert-notification {
+    position: fixed;
+    top: 160px;            /* Под HUD-блоком */
+    left: 40px;
+    width: 220px;
+    padding: 8px 12px;
+    
+    font-family: monospace;
+    font-size: 13px;
+    letter-spacing: 1px;
+    color: #ff5555;
+    
+    cursor: pointer;
+    z-index: 100;
+    
+    opacity: 0;
+    transition: opacity 0.6s ease;
+    
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+#alert-notification.visible {
+    opacity: 1;
+    animation: alert-pulse 1.2s ease-in-out infinite;
+}
+
+#alert-notification:hover {
+    color: #ff8888;
+}
+
+@keyframes alert-pulse {
+    0%   { text-shadow: 0 0 4px rgba(255, 85, 85, 0.4); }
+    50%  { text-shadow: 0 0 16px rgba(255, 85, 85, 1), 0 0 30px rgba(255, 85, 85, 0.6); }
+    100% { text-shadow: 0 0 4px rgba(255, 85, 85, 0.4); }
+}
+
+/* --- КРАСНОЕ ОКНО АВАРИЙНОГО СООБЩЕНИЯ (как у Алекса, но красное) --- */
+.alert-message {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.95);
+    width: 520px;
+    max-width: 90vw;
+    padding: 30px 35px;
+    
+    background: rgba(25, 10, 10, 0.75);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 85, 85, 0.6);
+    
+    font-family: monospace;
+    color: rgba(255, 220, 220, 0.85);
+    
+    z-index: 200;
+    
+    opacity: 0;
+    transition: opacity 0.8s ease, transform 0.8s ease;
+    
+    box-shadow: 0 0 25px rgba(255, 85, 85, 0.2);
+}
+
+.alert-message.visible {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+}
+
+.alert-header {
+    font-size: 12px;
+    letter-spacing: 3px;
+    color: rgba(255, 120, 120, 0.8);
+    margin-bottom: 20px;
+    border-bottom: 1px solid rgba(255, 85, 85, 0.3);
+    padding-bottom: 10px;
+}
+.alert-body {
+    font-size: 14px;
+    line-height: 1.6;
+    margin-bottom: 25px;
+    color: rgba(255, 230, 230, 0.95);
+    min-height: 120px;          /* Резервируем место под текст, чтобы не прыгало */
+}
+
+/* Кнопка появляется только после окончания печати */
+.alert-choices button.appearing {
+    opacity: 0;
+    animation: fadeInButton 0.6s ease forwards;
+}
+.alert-choices {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 50px;        /* Резервируем место под кнопку, чтобы окно не прыгало */
+}
+
+.alert-choices button {
+    padding: 12px 25px;
+    font-size: 12px;
+    letter-spacing: 2px;
+    color: rgba(255, 200, 200, 0.9);
+    border: 1px solid rgba(255, 85, 85, 0.5);
+    background: transparent;
+    cursor: pointer;
+    transition: all 0.4s ease;
+    
+    opacity: 0;
+    animation: fadeInButton 0.8s ease forwards;
+    animation-delay: 0.4s;
+}
+
+.alert-choices button:hover {
+    border-color: rgba(255, 120, 120, 1);
+    background: rgba(255, 85, 85, 0.1);
+    color: white;
 }

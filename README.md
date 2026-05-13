@@ -6,6 +6,10 @@
 - HTML
 - CSS
 - JavaScript
+- Без фреймворков и библиотек
+
+## Демо
+https://olya-myslin.github.io/iss-day/
 
 ## Уже реализовано
 - Плавные fade-переходы между сценами
@@ -24,3 +28,8 @@
 - Секретная сцена после выхода в космос 
 - Цифровой дневник космонавта с эффектом «живой печати» (текст печатается при нажатии любых клавиш игроком)
 - Финальный экран с информацией об авторе проекта 
+
+## Скриншоты
+<img width="600" src="https://github.com/user-attachments/assets/e4d8f9c1-1850-412f-b9d8-10e81d3902a1" />
+<img width="600" src="https://github.com/user-attachments/assets/c1716449-1834-4c96-ab50-4ea59d3bc40b" />
+<img width="600" src="https://github.com/user-attachments/assets/d470adee-408e-4e47-8432-227688bf8ac0" />

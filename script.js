@@ -1,7 +1,4 @@
-// =======================================================
-// 1. ПЕРЕМЕННЫЕ И НАСТРОЙКА
-// =======================================================
-
+let isTransitioning = false;  // Блокировка кликов во время переходов
 const starLayer = document.getElementById('star-layer');
 const bg = document.getElementById('bg');
 const gameContainer = document.getElementById('game-container');
@@ -17,7 +14,7 @@ const obj2 = document.getElementById('floating-object-2');
 const obj3 = document.getElementById('floating-object-3');
 const allFloaters = [obj1, obj2, obj3];
 
-// 2. ГЕНЕРАЦИЯ ЗВЕЗД (Твоя формула)
+// 2. ГЕНЕРАЦИЯ ЗВЕЗД 
 for (let i = 0; i < 120; i++) {
     const star = document.createElement('div');
     star.className = 'star';
@@ -60,11 +57,23 @@ function typeWriter(text, element, speed, callback) {
                 element.innerHTML += text.charAt(i); i++;
             }
             setTimeout(type, speed);
-        } else if (callback) { callback(); }
+        } else { 
+            isTransitioning = false;  // Снимаем замок после окончания печати
+            if (callback) callback(); 
+        }
     }
     type();
 }
+let currentScene = '';
+let cabinAlertTimer = null;
 
+function clearCabinObjects() {
+    document.querySelectorAll('.cabin-hotspot, .cabin-tooltip, .cabin-window-btn, #cabin-layer').forEach(el => el.remove());
+    if (cabinAlertTimer) {
+        clearTimeout(cabinAlertTimer);
+        cabinAlertTimer = null;
+    }
+}
 // 6. СЦЕНАРИЙ ИГРЫ (Story)
 const story = {
     'wake_up': {
@@ -196,55 +205,91 @@ const story = {
     triggerAlert: true   // После печати текста запустится тревога
 },
 
-// --- ЗАГЛУШКИ для финальных сцен ---
-'eva_prep_stub': {
-    text: "(Здесь будет сцена подготовки скафандра и выхода в открытый космос)",
-    background: 'none',
-    showAlarm: false,
-    options: []
-},
 
-'coordination_stub': {
-    text: "(Здесь будет сцена координации Алекса из модуля управления)",
-    background: 'none',
-    showAlarm: false,
-    options: []
-},
-'after_postpone': {
-    text: "Ты заканчиваешь оформлять отчёт по калибровке.<br>Через двадцать минут добираешься до гидропоники.<br>Растение всё ещё держится, но видно — было ближе к критической точке, чем хотелось бы.<br>\"Чуть позже было бы поздно. Но спасибо.\"",
-    background: 'url("images/control.png")',
-    showAlarm: false,
-    options: [
-        { text: "Продолжить день", nextScene: 'quiet_moment' }
-    ]
-},
 'after_refuse': {
     text: "\"Понял. Гляну сам, когда смогу.\"<br>Голос в наушниках звучит ровно, но ты слышишь в нём лёгкую усталость.<br>Через час по системе приходит уведомление:<br>\"Растение пришлось списать. Не страшно, но обидно.\"",
     background: 'url("images/control.png")',
     showAlarm: false,
     options: [
-        { text: "Продолжить день", nextScene: 'quiet_moment' }
+        { text: "Отправиться в каюту", nextScene: 'cabin' }
     ]
 },
+'cabin': {
+    text: "",
+    background: 'url("images/curiosity.png")',
+    showAlarm: false,
+    options: [],
+    isCabin: true
+},
+'cabin_window': {
+    text: "За стеклом — бесконечная чернота и тонкая голубая линия атмосферы.<br>Земля медленно поворачивается внизу.<br>Отсюда не видно границ. Только океаны, облака и свет.",
+    background: 'url("images/wind.png")',
+    showAlarm: false,
+    options: [
+        { text: "Вернуться в каюту", nextScene: 'cabin' }
+    ]
+},
+'cabin_window': {
+    text: "За стеклом — бесконечная чернота и тонкая голубая линия атмосферы.<br>Земля медленно поворачивается внизу.<br>Отсюда не видно границ. Только океаны, облака и свет.",
+    background: 'url("images/wind.png")',   // ← исправил wind.png на window.png
+    showAlarm: false,
+    options: [
+        { text: "Вернуться в каюту", nextScene: 'cabin' }
+    ]
+},
+
+// === НОВЫЕ СЦЕНЫ: ПОДГОТОВКА К ВЫХОДУ В КОСМОС ===
+'eva_suits': {
+    text: "Шлюзовой отсек «Квест».<br>Два скафандра EMU висят в креплениях — белые, массивные, как пустые оболочки.<br>Твой — справа. На шлеме уже наклеен позывной.",
+    background: 'url("images/suits.jpeg")',
+    showAlarm: false,
+    options: [
+        { text: "Начать подготовку", nextScene: 'eva_suit_on' }
+    ]
+},
+
+'eva_suit_on': {
+    text: "Перчатки встают на место с мягким щелчком.<br>Гермошлем опускается. Мир сужается до визора.<br>В наушниках — ровный голос ЦУПа: «Проверка связи. Слышим вас чисто.»<br>За переборкой — вакуум.",
+    background: 'url("images/suit_hands.png")',
+    showAlarm: false,
+    options: [
+        { text: "Открыть внешний люк", nextScene: 'eva_exit' }
+    ]
+},
+
+'eva_exit': {
+    text: "",
+    background: 'url("images/spacesuit3.png")',
+    showAlarm: false,
+    options: [],
+    isEVA: true
+},
+
 'quiet_moment': {
     text: "Ты возвращаешься к терминалу.<br>День идёт своим чередом.<br><br>(Эта сцена — заглушка, дальше будет продолжение сюжета)",
     background: 'url("images/control.png")',
     showAlarm: false,
     options: []
 }
-    
-};
+    };
+
 
 // 7. ФУНКЦИЯ СМЕНЫ СЦЕНЫ (Render)
 function renderScene(sceneKey) {
     const scene = story[sceneKey];
     if (!scene) return;
 
+    currentScene = sceneKey;
+//  ЗАЩИТА ОТ ДВОЙНЫХ КЛИКОВ
+    if (isTransitioning) return;
+    isTransitioning = true;
+
     // ШАГ 1: ПОЛНЫЙ BLACK FADE
     bg.style.opacity = '0';
     gameContainer.style.opacity = '0';
     allFloaters.forEach(el => { if(el) el.style.opacity = '0'; });
     bg.classList.remove('camera-active');
+    clearCabinObjects();
 
     setTimeout(() => {
         // ШАГ 2: ПОДГОТОВКА В ТЕМНОТЕ
@@ -259,10 +304,15 @@ function renderScene(sceneKey) {
         if (scene.background === 'none') {
             bg.style.backgroundImage = 'none';
             bg.style.backgroundColor = 'black';
-        } else {
-            bg.style.backgroundImage = scene.background;
-        }
-
+        } else if (!scene.isEVA) {
+    bg.style.backgroundImage = scene.background;
+}
+// === EVA: перехватываем до проявления фона ===
+if (scene.isEVA) {
+    isTransitioning = false;
+    startEVAMode();
+    return;
+}
         // ШАГ 3: ПРОЯВЛЕНИЕ
         setTimeout(() => {
             bg.style.opacity = '1';
@@ -281,8 +331,12 @@ function renderScene(sceneKey) {
                 });
             }
 
-            // ШАГ 4: ПЕЧАТЬ ТЕКСТА
-            setTimeout(() => {
+            
+                if (scene.isCabin) {
+                    isTransitioning = false;  // Снимаем замок, чтобы можно было кликать
+                    startCabinMode();
+                    return;
+                }
                 typeWriter(scene.text, gameText, 30, () => {
                     //--- ЗАПУСК АВАРИЙНОГО УВЕДОМЛЕНИЯ ---
                     if (scene.triggerAlert) {
@@ -352,11 +406,10 @@ function renderScene(sceneKey) {
 
                         choices.appendChild(btn);
                     });
-                    setTimeout(() => { choices.style.opacity = '1'; }, 500);
-                });
-            }, 1000);
-        }, 100);
-    }, 2000);
+            setTimeout(() => { choices.style.opacity = '1'; }, 500);
+        });
+    }, 100);
+}, 2000);
 }
 function startCalibration(mode) {
 
@@ -823,10 +876,9 @@ function showCrewMessage() {
         const choicesBox = message.querySelector(".crew-choices");
         
         const options = [
-            { text: "Идти к гидропонике", scene: "hydroponics", readiness: 2 },
-            { text: "Сначала закончить свои задачи", scene: "after_postpone", readiness: 1 },
-            { text: "Сказать, что занят", scene: "after_refuse", readiness: 0 }
-        ];
+    { text: "Идти к гидропонике", scene: "hydroponics", readiness: 2 },
+    { text: "Сказать, что занят", scene: "after_refuse", readiness: 0 }
+];
         
         options.forEach(opt => {
             const btn = document.createElement("button");
@@ -953,14 +1005,14 @@ function showAlertMessage() {
         let finalText, finalBtn, nextScene;
 
         if (readiness >= 8) {
-            finalText = "— Командир, телеметрия чистая.<br>Вы сегодня работали собранно и без срывов.<br>Подтверждаем ваш выход. Алекс — на подстраховке внутри.<br>Начинайте подготовку скафандра.";
-            finalBtn = "ПРИНЯТЬ КОМАНДУ";
-            nextScene = 'eva_prep_stub';
-        } else {
-            finalText = "— Командир, по данным за смену видим<br>повышенный пульс и накопленную усталость.<br>Риск слишком высокий. На внешнюю обшивку идёт Алекс.<br>Вы координируете его изнутри.";
-            finalBtn = "ПРИНЯТО";
-            nextScene = 'coordination_stub';
-        }
+    finalText = "— Командир, телеметрия чистая.<br>Вы сегодня работали собранно и без срывов.<br>Подтверждаем ваш выход. Алекс — на подстраховке внутри.<br>Начинайте подготовку скафандра.";
+    finalBtn = "ПРИНЯТЬ КОМАНДУ";
+    nextScene = 'eva_suits';
+} else {
+    finalText = "— Командир, по данным за смену видим<br>повышенный пульс и накопленную усталость.<br>Риск слишком высокий. На внешнюю обшивку идёт Алекс.<br>Вы координируете его изнутри.";
+    finalBtn = "ПРИНЯТО";
+    nextScene = 'eva_suits';           // теперь обе ветки идут на подготовку
+}
 
         typeWriter(finalText, textBox, 25, () => {
             const btn = document.createElement('button');
@@ -982,4 +1034,154 @@ function showAlertMessage() {
 
     // Запускаем первую реплику
     showStep();
+}
+function startCabinMode() {
+    // Очищаем старые элементы каюты
+    clearCabinObjects();
+
+    // === СЛОЙ ДЛЯ ИНТЕРАКТИВНЫХ ЗОН ===
+    const layer = document.createElement('div');
+    layer.id = 'cabin-layer';
+    document.body.appendChild(layer);
+
+    // === ЗОНА ФИГУРКИ CURIOSITY ===
+    const curiosityZone = document.createElement('div');
+    curiosityZone.classList.add('cabin-hotspot', 'hotspot-curiosity');
+    layer.appendChild(curiosityZone);
+
+    // Tooltip для фигурки
+    const tooltip = document.createElement('div');
+    tooltip.classList.add('cabin-tooltip');
+    document.body.appendChild(tooltip);
+
+    curiosityZone.onmouseenter = () => {
+        tooltip.innerHTML = 
+            "Пластиковый марсоход размером с ладонь.<br>" +
+            "Подарок перед стартом.<br>" +
+            "Когда смотришь на него, становится легче помнить,<br>" +
+            "что космос — это не только расстояние,<br>" +
+            "но и обещание вернуться.";
+        tooltip.classList.add('visible');
+    };
+
+    curiosityZone.onmousemove = (e) => {
+        tooltip.style.left = (e.clientX + 20) + 'px';
+        tooltip.style.top = (e.clientY - 80) + 'px';
+    };
+
+    curiosityZone.onmouseleave = () => {
+        tooltip.classList.remove('visible');
+    };
+
+    // === КНОПКА ИЛЛЮМИНАТОРА ===
+    const windowBtn = document.createElement('button');
+    windowBtn.textContent = 'Посмотреть\nв иллюминатор';
+    windowBtn.classList.add('window-btn', 'cabin-window-btn');
+    layer.appendChild(windowBtn);
+
+    // Плавное появление кнопки
+    setTimeout(() => {
+        windowBtn.style.opacity = '1';
+    }, 1500);
+
+    windowBtn.onclick = () => {
+        playClickSound();
+
+        // Убираем элементы каюты
+        clearCabinObjects();
+
+        // Плавный переход
+        bg.style.opacity = '0';
+        gameContainer.style.opacity = '0';
+
+        setTimeout(() => {
+            renderScene('cabin_window');
+        }, 2000);
+    };
+
+    // === АВАРИЙНОЕ УВЕДОМЛЕНИЕ ЧЕРЕЗ 35 СЕКУНД ===
+    cabinAlertTimer = setTimeout(() => {
+        if (currentScene === 'cabin') {
+            showAlertNotification();
+        }
+    }, 20000);
+}
+
+// === РЕЖИМ ВЫХОДА В КОСМОС ===
+let breathingAudio = null;
+
+function startEVAMode() {
+    // Сразу прячем фон до того, как он успеет мелькнуть
+    bg.style.transition = 'none';
+    bg.style.opacity = '0';
+    bg.style.backgroundImage = 'none';
+    bg.style.backgroundColor = 'black';
+
+    // Убираем кнопки
+    choices.innerHTML = "";
+    choices.style.opacity = '0';
+
+    // Показываем чёрный экран и текст
+    setTimeout(() => {
+        bg.style.opacity = '1';
+        gameContainer.style.opacity = '1';
+        gameText.style.transition = 'opacity 2s ease';
+        gameText.style.opacity = '1';
+    }, 50);
+
+    // Плавно гасим основную музыку
+    let fadeOutMusic = setInterval(() => {
+        if (music.volume > 0.02) {
+            music.volume -= 0.02;
+        } else {
+            music.volume = 0;
+            music.pause();
+            clearInterval(fadeOutMusic);
+        }
+    }, 100);
+
+    // Запускаем дыхание сразу — на чёрном экране
+    breathingAudio = new Audio('audio/gear_024.mp3');
+    breathingAudio.loop = true;
+    breathingAudio.volume = 0;
+    breathingAudio.play();
+
+    let fadeInBreathing = setInterval(() => {
+        if (breathingAudio.volume < 0.5) {
+            breathingAudio.volume += 0.01;
+        } else {
+            clearInterval(fadeInBreathing);
+        }
+    }, 100);
+
+    // Печатаем текст на чёрном фоне
+    typeWriter(
+        "Люк открывается.<br>Тишина.<br>Абсолютная, оглушающая тишина.<br>Под тобой — Земля. Над тобой — всё остальное.",
+        gameText,
+        40,
+        () => {
+            // Держим текст 4 секунды
+            setTimeout(() => {
+                // Плавно скрываем текст
+                gameText.style.transition = 'opacity 2s ease';
+                gameText.style.opacity = '0';
+
+                // Ждём пока текст исчезнет, потом меняем фон
+setTimeout(() => {
+    // Сначала меняем картинку пока фон НЕ виден (opacity = 0 был в самом начале функции, но тут мы его на 1 уже подняли — поэтому опять опускаем)
+    bg.style.transition = 'none';
+    bg.style.opacity = '0';
+    bg.style.backgroundImage = 'url("images/spacesuit3.png")';
+    bg.style.backgroundColor = 'transparent';
+
+    // Даём браузеру 50мс отрисовать чёрный с уже подгруженным фоном
+    setTimeout(() => {
+        bg.style.transition = 'opacity 3s ease';
+        bg.style.opacity = '1';
+    }, 50);
+}, 2000);
+
+            }, 4000);
+        }
+    );
 }

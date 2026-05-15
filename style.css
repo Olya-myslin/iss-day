@@ -21,7 +21,8 @@ body {
     background-size: cover;
     z-index: 1;
     opacity: 1;
-    transition: opacity 2s ease-in-out;
+    /* Объединённый transition — без дублей */
+    transition: opacity 2s ease-in-out, filter 1.5s ease;
 }
 
 .stars { 
@@ -41,8 +42,8 @@ body {
 }
 
 @keyframes twinkle {
-    0% { opacity: 0.2; transform: scale(0.8); box-shadow: 0 0 2px white; }
-    50% { opacity: 1; transform: scale(1.2); box-shadow: 0 0 10px white; }
+    0%   { opacity: 0.2; transform: scale(0.8); box-shadow: 0 0 2px white; }
+    50%  { opacity: 1;   transform: scale(1.2); box-shadow: 0 0 10px white; }
     100% { opacity: 0.2; transform: scale(0.8); box-shadow: 0 0 2px white; }
 }
 
@@ -50,7 +51,11 @@ body {
     position: fixed; 
     inset: 0; 
     z-index: 3;
-    background: radial-gradient(circle at center, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.8) 100%);
+    background: radial-gradient(
+        circle at center, 
+        rgba(0,0,0,0.2) 0%, 
+        rgba(0,0,0,0.8) 100%
+    );
 }
 
 /* --- КОНТЕНТ --- */
@@ -74,7 +79,9 @@ body {
     letter-spacing: 12px; 
     line-height: 1.1; 
     margin-bottom: 60px;
-    text-shadow: 0 0 15px rgba(255, 255, 255, 0.4), 0 0 35px rgba(255, 255, 255, 0.2);
+    text-shadow: 
+        0 0 15px rgba(255, 255, 255, 0.4), 
+        0 0 35px rgba(255, 255, 255, 0.2);
 }
 
 #game-text {
@@ -87,26 +94,22 @@ body {
     color: white;
     text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
     text-align: center;
-
-    /* === ФИКС ПРЫЖКОВ === */
     min-height: 120px;
     margin-left: auto;
     margin-right: auto;
     display: flex;
-    flex-direction: column;   /* строки текста идут друг под другом */
-    align-items: center;      /* центрируем по горизонтали */
-    justify-content: center;  /* и по вертикали */
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
 }
 
 #choices {
     transition: opacity 1s ease-in-out;
-    
-    /* === ФИКС ПРЫЖКОВ === */
-    min-height: 60px;         /* Резервируем место под кнопки */
+    min-height: 60px;
     display: flex;
     justify-content: center;
     align-items: center;
-    flex-wrap: wrap;          /* Если кнопок много — переносим на новую строку */
+    flex-wrap: wrap;
 }
 
 button {
@@ -141,11 +144,15 @@ button:hover {
     z-index: 100;
 }
 
-#colon { animation: blink 1s step-end infinite; }
-@keyframes blink { 50% { opacity: 0; } }
+#colon { 
+    animation: blink 1s step-end infinite; 
+}
+
+@keyframes blink { 
+    50% { opacity: 0; } 
+}
 
 /* --- ЛЕТАЮЩИЕ ПРЕДМЕТЫ --- */
-/* Здесь мы используем классы для всех трех объектов */
 #floating-object-1, 
 #floating-object-2, 
 #floating-object-3 {
@@ -159,87 +166,69 @@ button:hover {
     pointer-events: none;
     transition: opacity 2s ease-in-out, filter 0.4s ease, transform 0.4s ease;
 }
-/* Будильник — увеличенный размер */
+
 .floater[src*="alarm.png"] {
     width: 600px !important;
 }
 
-/* Анимации движения */
 #floating-object-1 { animation: floatAnim1 75s infinite alternate ease-in-out; }
 #floating-object-2 { animation: floatAnim2 62s infinite alternate ease-in-out; }
 #floating-object-3 { animation: floatAnim3 69s infinite alternate ease-in-out; }
 
-/* Эффект подсветки при наведении на кнопку */
 .highlight-item {
     filter: drop-shadow(0 0 25px rgba(255, 255, 255, 0.9)) !important;
     opacity: 1 !important;
 }
 
-/* Траектории полета */
 @keyframes floatAnim1 {
-    0% { transform: translate(-110%, -20%) rotate(-15deg); }
-    33% { transform: translate(-50%, -40%) rotate(10deg); }
-    66% { transform: translate(-130%, -30%) rotate(-5deg); }
+    0%   { transform: translate(-110%, -20%) rotate(-15deg); }
+    33%  { transform: translate(-50%,  -40%) rotate(10deg); }
+    66%  { transform: translate(-130%, -30%) rotate(-5deg); }
     100% { transform: translate(-110%, -20%) rotate(-15deg); }
 }
 
 @keyframes floatAnim2 {
-    0% { transform: translate(-50%, -60%) rotate(3deg); }
-    50% { transform: translate(10%, -20%) rotate(-6deg); }
+    0%   { transform: translate(-50%, -60%) rotate(3deg); }
+    50%  { transform: translate(10%,  -20%) rotate(-6deg); }
     100% { transform: translate(-80%, -50%) rotate(2deg); }
 }
 
 @keyframes floatAnim3 {
-    0% { transform: translate(-80%, -20%) rotate(-2deg); }
-    50% { transform: translate(20%, -60%) rotate(4deg); }
+    0%   { transform: translate(-80%, -20%) rotate(-2deg); }
+    50%  { transform: translate(20%,  -60%) rotate(4deg); }
     100% { transform: translate(-40%, -40%) rotate(-2deg); }
 }
 
 /* --- ЖИВАЯ КАМЕРА --- */
 @keyframes cameraBreathing {
-    0% { transform: scale(1) translate(0, 0); }
-    30% { transform: scale(1.06) translate(-0.5%, 0.3%); }
-    60% { transform: scale(1.03) translate(0.3%, -0.2%); }
-    100% { transform: scale(1) translate(0, 0); }
+    0%   { transform: scale(1)    translate(0, 0); }
+    30%  { transform: scale(1.06) translate(-0.5%, 0.3%); }
+    60%  { transform: scale(1.03) translate(0.3%, -0.2%); }
+    100% { transform: scale(1)    translate(0, 0); }
 }
 
-.camera-move {
+/* ИСПРАВЛЕНО: было .camera-move, в JS добавляется camera-active */
+.camera-active {
     animation: cameraBreathing 25s ease-in-out infinite;
 }
-/* Кнопка специально для иллюминатора */
-.window-btn {
+
+/* --- КНОПКА ИЛЛЮМИНАТОРА (фиксированная, для каюты) --- */
+.window-btn-fixed {
     position: fixed !important;
-    
-    /* РАСПОЛОЖЕНИЕ */
-    left: 3% !important;       /* Сильно левее */
-    top: 43% !important;       /* Подняли выше центра */
+    left: 2% !important;
+    top: 44% !important;
     transform: none !important;
-    
-    /* РАЗМЕР И ФОРМА (Квадратная) */
     width: 140px !important;
     height: 80px !important;
-    padding: 10px !important;  /* Меньший внутренний отступ */
-    
-    /* ШРИФТ (мельче) */
+    padding: 10px !important;
     font-size: 11px !important;
     letter-spacing: 2px !important;
     line-height: 1.4 !important;
-    
     margin: 0 !important;
     z-index: 20;
 }
 
-
-/* Анимация движения Земли */
-@keyframes earthDrift {
-    0% { transform: scale(1.05) translateY(0); }
-    50% { transform: scale(1.08) translateY(-20px); }
-    100% { transform: scale(1.05) translateY(0); }
-}
-
-.background {
-    transition: opacity 2s ease-in-out, filter 1.5s ease;
-}
+/* --- КАЛИБРОВКА --- */
 .calibration-module {
     position: fixed;
     top: 50%;
@@ -249,6 +238,7 @@ button:hover {
     height: 60%;
     z-index: 20;
 }
+
 .calibration-fill {
     position: absolute;
     inset: 0;
@@ -258,34 +248,27 @@ button:hover {
     transition: opacity 0.8s ease;
     pointer-events: none;
 }
+
 .calibration-svg {
     width: 100%;
     height: 100%;
 }
 
+/* Единый блок без дублирования */
 .calibration-rect {
     fill: none;
     stroke: white;
     stroke-width: 1;
-    filter: drop-shadow(0 0 6px rgba(255,255,255,0.4));
-}
-.calibration-rect {
-    fill: none;
-    stroke: white;
-    stroke-width: 1;
-
     stroke-dasharray: 3200;
     stroke-dashoffset: 3200;
-
     filter: drop-shadow(0 0 6px rgba(255,255,255,0.4));
-
-    transition: stroke-dashoffset 2.5s ease,
-                filter 0.6s ease;
+    transition: stroke-dashoffset 2.5s ease, filter 0.6s ease;
 }
+
 .calibration-glow {
     filter: drop-shadow(0 0 14px rgba(255,255,255,0.6));
-    transition: filter 0.6s ease;
 }
+
 .calibration-content {
     position: absolute;
     inset: 0;
@@ -298,6 +281,7 @@ button:hover {
     transition: opacity 1s ease;
     z-index: 3;
 }
+
 .calibration-bar {
     position: absolute;
     bottom: 80px;
@@ -305,7 +289,6 @@ button:hover {
     right: 60px;
     height: 2px;
     background: rgba(255,255,255,0.3);
-
     opacity: 0;
     transform: translateY(10px);
     transition: opacity 0.6s ease, transform 0.6s ease;
@@ -327,15 +310,16 @@ button:hover {
     background: white;
     box-shadow: 0 0 8px rgba(255,255,255,0.6);
 }
+
 /* --- HUD СТАТУСА --- */
 #hud-status {
     position: fixed;
-    top: 80px; /* Ниже часов */
+    top: 80px;
     left: 40px;
     width: 220px;
     height: 60px;
     z-index: 100;
-    opacity: 0; /* Скрыт в начале */
+    opacity: 0;
     transition: opacity 1s ease;
 }
 
@@ -352,8 +336,8 @@ button:hover {
     stroke-width: 1;
     stroke-dasharray: 600;
     stroke-dashoffset: 600;
-    opacity: 0.6;  
-    filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.3));  
+    opacity: 0.6;
+    filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.3));
     transition: stroke-dashoffset 1.5s ease;
 }
 
@@ -373,20 +357,20 @@ button:hover {
 }
 
 #hud-status.visible .hud-content {
-    opacity: 0.6;  /* Та же приглушённость, что у часов */
+    opacity: 0.6;
 }
 
 @keyframes hud-pulse {
-    0%   { filter: brightness(1) drop-shadow(0 0 3px rgba(255, 255, 255, 0.3)); }
-    50%  { filter: brightness(2) drop-shadow(0 0 15px rgba(255, 255, 255, 0.9)); }
-    100% { filter: brightness(1) drop-shadow(0 0 3px rgba(255, 255, 255, 0.3)); }
+    0%   { filter: brightness(1)   drop-shadow(0 0 3px  rgba(255,255,255,0.3)); }
+    50%  { filter: brightness(2)   drop-shadow(0 0 15px rgba(255,255,255,0.9)); }
+    100% { filter: brightness(1)   drop-shadow(0 0 3px  rgba(255,255,255,0.3)); }
 }
 
 .pulse-active {
     animation: hud-pulse 0.6s ease-out;
 }
 
-/* СООБЩЕНИЕ ОТ КОЛЛЕГИ (внутренняя связь) */
+/* --- СООБЩЕНИЕ ОТ КОЛЛЕГИ --- */
 .crew-message {
     position: fixed;
     top: 50%;
@@ -395,19 +379,14 @@ button:hover {
     width: 520px;
     max-width: 90vw;
     padding: 30px 35px;
-    
     background: rgba(10, 15, 25, 0.7);
     backdrop-filter: blur(8px);
     border: 1px solid rgba(255, 255, 255, 0.6);
-    
     font-family: monospace;
     color: rgba(255, 255, 255, 0.85);
-    
     z-index: 200;
-    
     opacity: 0;
     transition: opacity 0.8s ease, transform 0.8s ease;
-    
     box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
 }
 
@@ -443,56 +422,44 @@ button:hover {
 .crew-choices {
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    min-height: 150px;  
+    gap: 6px;
+    min-height: 80px 
 }
 
 .crew-choices button {
-    padding: 12px 20px;
+    padding: 10px 20px;
     font-size: 12px;
     letter-spacing: 2px;
     margin: 0;
     width: 100%;
-    
-    /* Плавное появление */
     opacity: 0;
     animation: fadeInButton 0.8s ease forwards;
 }
 
-/* Каждая следующая кнопка появляется чуть позже */
 .crew-choices button:nth-child(1) { animation-delay: 0s; }
 .crew-choices button:nth-child(2) { animation-delay: 0.2s; }
 .crew-choices button:nth-child(3) { animation-delay: 0.4s; }
 
 @keyframes fadeInButton {
-    from { 
-        opacity: 0;
-        transform: translateY(5px);
-    }
-    to { 
-        opacity: 1;
-        transform: translateY(0);
-    }
+    from { opacity: 0; transform: translateY(5px); }
+    to   { opacity: 1; transform: translateY(0); }
 }
-/* --- АВАРИЙНОЕ УВЕДОМЛЕНИЕ ПОД HUD --- */
+
+/* --- АВАРИЙНОЕ УВЕДОМЛЕНИЕ --- */
 #alert-notification {
     position: fixed;
-    top: 160px;            /* Под HUD-блоком */
+    top: 160px;
     left: 40px;
     width: 220px;
     padding: 8px 12px;
-    
     font-family: monospace;
     font-size: 13px;
     letter-spacing: 1px;
     color: #ff5555;
-    
     cursor: pointer;
     z-index: 100;
-    
     opacity: 0;
     transition: opacity 0.6s ease;
-    
     display: flex;
     align-items: center;
     gap: 8px;
@@ -508,12 +475,12 @@ button:hover {
 }
 
 @keyframes alert-pulse {
-    0%   { text-shadow: 0 0 4px rgba(255, 85, 85, 0.4); }
+    0%   { text-shadow: 0 0 4px  rgba(255, 85, 85, 0.4); }
     50%  { text-shadow: 0 0 16px rgba(255, 85, 85, 1), 0 0 30px rgba(255, 85, 85, 0.6); }
-    100% { text-shadow: 0 0 4px rgba(255, 85, 85, 0.4); }
+    100% { text-shadow: 0 0 4px  rgba(255, 85, 85, 0.4); }
 }
 
-/* --- КРАСНОЕ ОКНО АВАРИЙНОГО СООБЩЕНИЯ (как у Алекса, но красное) --- */
+/* --- ОКНО АВАРИЙНОГО СООБЩЕНИЯ --- */
 .alert-message {
     position: fixed;
     top: 50%;
@@ -522,19 +489,14 @@ button:hover {
     width: 520px;
     max-width: 90vw;
     padding: 30px 35px;
-    
     background: rgba(25, 10, 10, 0.75);
     backdrop-filter: blur(8px);
     border: 1px solid rgba(255, 85, 85, 0.6);
-    
     font-family: monospace;
     color: rgba(255, 220, 220, 0.85);
-    
     z-index: 200;
-    
     opacity: 0;
     transition: opacity 0.8s ease, transform 0.8s ease;
-    
     box-shadow: 0 0 25px rgba(255, 85, 85, 0.2);
 }
 
@@ -551,24 +513,20 @@ button:hover {
     border-bottom: 1px solid rgba(255, 85, 85, 0.3);
     padding-bottom: 10px;
 }
+
 .alert-body {
     font-size: 14px;
     line-height: 1.6;
     margin-bottom: 25px;
     color: rgba(255, 230, 230, 0.95);
-    min-height: 120px;          /* Резервируем место под текст, чтобы не прыгало */
+    min-height: 120px;
 }
 
-/* Кнопка появляется только после окончания печати */
-.alert-choices button.appearing {
-    opacity: 0;
-    animation: fadeInButton 0.6s ease forwards;
-}
 .alert-choices {
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 50px;        /* Резервируем место под кнопку, чтобы окно не прыгало */
+    min-height: 50px;
 }
 
 .alert-choices button {
@@ -580,10 +538,14 @@ button:hover {
     background: transparent;
     cursor: pointer;
     transition: all 0.4s ease;
-    
     opacity: 0;
     animation: fadeInButton 0.8s ease forwards;
     animation-delay: 0.4s;
+}
+
+.alert-choices button.appearing {
+    opacity: 0;
+    animation: fadeInButton 0.6s ease forwards;
 }
 
 .alert-choices button:hover {
@@ -592,35 +554,30 @@ button:hover {
     color: white;
 }
 
-/* --- ВСПЛЫВАЮЩАЯ ПОДСКАЗКА К ПРЕДМЕТУ --- */
+/* --- КАЮТА --- */
 .cabin-tooltip {
     position: absolute;
     max-width: 320px;
     padding: 15px 20px;
-    
     background: rgba(10, 15, 25, 0.85);
     backdrop-filter: blur(6px);
     border: 1px solid rgba(255, 255, 255, 0.3);
-    
     font-family: 'Inter', sans-serif;
     font-size: 14px;
     font-weight: 300;
     line-height: 1.5;
     color: rgba(255, 255, 255, 0.95);
-    
     pointer-events: none;
     z-index: 50;
-    
     opacity: 0;
     transition: opacity 0.4s ease;
-    
     text-shadow: 0 0 8px rgba(0, 0, 0, 0.8);
 }
 
 .cabin-tooltip.visible {
     opacity: 1;
 }
-/* === СЛОЙ ИНТЕРАКТИВНЫХ ЗОН КАЮТЫ === */
+
 #cabin-layer {
     position: fixed;
     inset: 0;
@@ -628,7 +585,6 @@ button:hover {
     pointer-events: none;
 }
 
-/* === ИНТЕРАКТИВНАЯ ЗОНА (HOTSPOT) === */
 .cabin-hotspot {
     position: absolute;
     cursor: pointer;
@@ -643,8 +599,6 @@ button:hover {
     box-shadow: 0 0 30px rgba(255, 255, 255, 0.08);
 }
 
-/* === ПОЗИЦИЯ ФИГУРКИ CURIOSITY === */
-/* Подстрой проценты под своё изображение! */
 .hotspot-curiosity {
     top: 54%;
     left: 40%;
@@ -652,7 +606,7 @@ button:hover {
     height: 20%;
 }
 
-/* === КНОПКА ИЛЛЮМИНАТОРА В КАЮТЕ === */
+/* Кнопка иллюминатора в каюте */
 .cabin-window-btn {
     position: fixed !important;
     right: 5% !important;
@@ -671,7 +625,8 @@ button:hover {
     transition: opacity 1.5s ease, border-color 0.5s ease, background 0.5s ease;
     white-space: pre-line;
 }
-/* === ИГРОВАЯ ПАНЕЛЬ ВНИЗУ === */
+
+/* --- ИГРОВАЯ ПАНЕЛЬ --- */
 #scene-panel {
     position: fixed;
     bottom: 50px;
@@ -679,12 +634,8 @@ button:hover {
     transform: translateX(-50%);
     width: 75%;
     max-width: 1100px;
-    height: 210px;
+    height: 200px;
     z-index: 20;
-
-    border: 1.5px solid white;
-    box-shadow: 0 0 12px rgba(255, 255, 255, 0.4);
-
     opacity: 0;
     transition: opacity 1s ease;
     pointer-events: none;
@@ -702,17 +653,16 @@ button:hover {
 .scene-panel-content {
     position: relative;
     z-index: 2;
-    padding: 30px 50px;
+    padding: 22px 50px;
     backdrop-filter: blur(3px);
     background: rgba(10, 15, 25, 0.25);
     height: 100%;
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
-    gap: 20px;
+    gap: 15px;
 }
 
-/* SVG-рамка как в калибровке, но быстрее */
 .scene-panel-svg {
     position: absolute;
     inset: 0;
@@ -730,45 +680,29 @@ button:hover {
     stroke-dashoffset: 2600;
     filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.4));
     transition: stroke-dashoffset 2.1s ease, filter 0.6s ease;
-    /* было 2.5s в калибровке — теперь ~15% быстрее */
 }
 
 .scene-panel-rect.glow {
     filter: drop-shadow(0 0 14px rgba(255, 255, 255, 0.6));
 }
 
-.scene-panel-content {
-    position: relative;
-    z-index: 2;
-    padding: 35px 50px;
-    backdrop-filter: blur(3px);
-    background: rgba(10, 15, 25, 0.25);
-    min-height: 180px;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start; 
-    gap: 20px;
-}
-
-/* Переопределяем #game-text внутри панели */
+/* Текст внутри панели */
 #scene-panel #game-text {
     font-family: monospace;
     font-weight: 400;
     font-size: 17px;
     letter-spacing: 2px;
-    line-height: 1.6;
+    line-height: 1.5;
     color: white;
     text-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
     text-align: left;
-
-    /* Сбрасываем старые flex-настройки */
     min-height: auto;
     margin: 0;
     display: block;
     max-width: 100%;
 }
 
-/* Кнопки выбора — текстом со стрелочкой, без рамки */
+/* Кнопки внутри панели */
 #scene-panel #choices {
     display: flex;
     flex-direction: row;
@@ -786,20 +720,17 @@ button:hover {
     border: none;
     padding: 0;
     margin: 0;
-
     font-family: monospace;
     font-size: 15px;
     letter-spacing: 2px;
     text-transform: none;
     color: rgba(255, 255, 255, 0.75);
-
     cursor: pointer;
     transition: color 0.3s ease, text-shadow 0.3s ease, transform 0.3s ease;
 }
 
-/* Стрелочка слева от текста, появляется при наведении */
 #scene-panel #choices button::before {
-    content: "  ";   /* пустое место — резервируем ширину под стрелку */
+    content: "  ";
     display: inline-block;
     width: 18px;
     color: white;
@@ -815,9 +746,8 @@ button:hover {
     content: "> ";
 }
 
-/* Кнопка иллюминатора в панели — отдельный стиль */
+/* Кнопка иллюминатора внутри панели — без фиксированного позиционирования */
 #scene-panel #choices button.window-btn {
-    /* Сбрасываем фиксированное позиционирование из старого .window-btn */
     position: static !important;
     width: auto !important;
     height: auto !important;
@@ -826,4 +756,21 @@ button:hover {
     letter-spacing: 2px !important;
     line-height: 1.6 !important;
     margin: 0 !important;
+}
+/* Плавное появление кнопок в основной панели */
+#scene-panel #choices button {
+    opacity: 0;
+    animation: fadeInButton 0.8s ease forwards;
+}
+
+#scene-panel #choices button:nth-child(1) { animation-delay: 0s; }
+#scene-panel #choices button:nth-child(2) { animation-delay: 0.2s; }
+#scene-panel #choices button:nth-child(3) { animation-delay: 0.4s; }
+
+#cal-hint {
+    font-family: monospace;
+    font-size: 14px;
+    letter-spacing: 3px;
+    color: rgba(255, 255, 255, 0.6);
+    margin-bottom: 10px;
 }

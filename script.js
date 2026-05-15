@@ -46,25 +46,74 @@ function playClickSound() {
     clickSound.play();
 }
 
-// 5. ПЕЧАТЬ ТЕКСТА
+// Один общий объект для звука печати
+let typingSound = null;
+
+function startTypingSound() {
+    // Если вдруг уже играет — останавливаем предыдущий
+    stopTypingSound();
+
+    typingSound = new Audio('audio/type.mp3');
+    typingSound.loop = true;
+    typingSound.volume = 0.10;   // громкость
+    typingSound.play().catch(() => {});
+}
+
+function stopTypingSound() {
+    if (typingSound) {
+        typingSound.pause();
+        typingSound.currentTime = 0;
+        typingSound = null;
+    }
+}
+
 function typeWriter(text, element, speed, callback) {
     let i = 0;
     element.innerHTML = "";
+
+    // === ЗАПУСКАЕМ ЗВУК ===
+    startTypingSound();
+
     function type() {
         if (i < text.length) {
             if (text.substring(i, i + 4) === "<br>") {
-                element.innerHTML += "<br>"; i += 4;
+                element.innerHTML += "<br>";
+                i += 4;
             } else {
-                element.innerHTML += text.charAt(i); i++;
+                element.innerHTML += text.charAt(i);
+                i++;
             }
             setTimeout(type, speed);
-        } else { 
-            isTransitioning = false;  // Снимаем замок после окончания печати
-            if (callback) callback(); 
+        } else {
+            // === ОСТАНАВЛИВАЕМ ЗВУК ===
+            stopTypingSound();
+
+            isTransitioning = false;
+            if (callback) callback();
         }
     }
     type();
 }
+
+function stopTypingSound() {
+    if (!typingSound) return;
+
+    const snd = typingSound;
+    typingSound = null;
+
+    // Плавное затухание за 200 мс
+    const fadeStep = snd.volume / 10;
+    const fadeInterval = setInterval(() => {
+        if (snd.volume > fadeStep) {
+            snd.volume -= fadeStep;
+        } else {
+            snd.pause();
+            snd.currentTime = 0;
+            clearInterval(fadeInterval);
+        }
+    }, 10);
+}
+
 let currentScene = '';
 let cabinAlertTimer = null;
 
@@ -75,7 +124,6 @@ function clearCabinObjects() {
         cabinAlertTimer = null;
     }
 }
-// === ПАНЕЛЬ СЦЕН ===
 function showScenePanel() {
     if (!scenePanel) return;
     if (scenePanel.classList.contains('visible')) return;
@@ -83,10 +131,31 @@ function showScenePanel() {
     scenePanel.classList.remove('hidden');
 
     gameText.style.opacity = '1';
-    choices.style.opacity = '1';
+    choices.style.opacity = '0';   // кнопки скрыты, появятся позже
+
+    // Сбрасываем рамку, чтобы она нарисовалась заново
+    const rect = scenePanel.querySelector('.scene-panel-rect');
+    if (rect) {
+        rect.style.transition = 'none';
+        rect.style.strokeDashoffset = '2600';
+        rect.classList.remove('glow');
+    }
 
     requestAnimationFrame(() => {
         scenePanel.classList.add('visible');
+
+        // Запускаем рисование рамки
+        if (rect) {
+            requestAnimationFrame(() => {
+                rect.style.transition = 'stroke-dashoffset 2.1s ease, filter 0.6s ease';
+                rect.style.strokeDashoffset = '0';
+            });
+
+            // После окончания рисования — лёгкое свечение
+            setTimeout(() => {
+                rect.classList.add('glow');
+            }, 2100);
+        }
     });
 }
 
@@ -140,7 +209,7 @@ const story = {
     options: [
     { text: "Полная калибровка", nextScene: 'calibration_full', readiness: 4 },
     { text: "Быстрая калибровка", nextScene: 'calibration_fast', readiness: 1 },
-    { text: "Посмотреть в иллюминатор", nextScene: 'window_view', customClass: 'window-btn', readiness: 1 }
+    { text: "Посмотреть в иллюминатор", nextScene: 'window_view', customClass: 'window-btn-fixed', readiness: 1 }
 ]
 },
 'window_view': {
@@ -270,7 +339,7 @@ const story = {
 
 // === НОВЫЕ СЦЕНЫ: ПОДГОТОВКА К ВЫХОДУ В КОСМОС ===
 'eva_suits': {
-    text: "Шлюзовой отсек «Квест».<br>Два скафандра EMU висят в креплениях — белые, массивные, как пустые оболочки.<br>Твой — справа. На шлеме уже наклеен позывной.",
+    text: "Шлюзовой отсек «Квест».<br>Три скафандра EMU висят в креплениях — белые, массивные, как пустые оболочки.<br>Твой — справа. На шлеме уже наклеен позывной.",
     background: 'url("images/suits.jpeg")',
     showAlarm: false,
     options: [
@@ -302,15 +371,13 @@ const story = {
     options: []
 }
     };
-
-
-// 7. ФУНКЦИЯ СМЕНЫ СЦЕНЫ (Render)
 function renderScene(sceneKey) {
     const scene = story[sceneKey];
     if (!scene) return;
 
     currentScene = sceneKey;
-//  ЗАЩИТА ОТ ДВОЙНЫХ КЛИКОВ
+
+    // ЗАЩИТА ОТ ДВОЙНЫХ КЛИКОВ
     if (isTransitioning) return;
     isTransitioning = true;
 
@@ -318,39 +385,47 @@ function renderScene(sceneKey) {
     bg.style.opacity = '0';
     gameContainer.style.opacity = '0';
     allFloaters.forEach(el => { if(el) el.style.opacity = '0'; });
-    bg.classList.remove('camera-active');
     clearCabinObjects();
 
+    // === НОВОЕ: убираем фиксированные кнопки прошлой сцены ===
+    document.querySelectorAll('[data-fixed-extra="true"]').forEach(el => el.remove());
+
     setTimeout(() => {
-    // ШАГ 2: ПОДГОТОВКА В ТЕМНОТЕ
-    choices.innerHTML = "";
-    choices.style.opacity = '0';
-    gameText.innerHTML = "";
+        // ШАГ 2: ПОДГОТОВКА В ТЕМНОТЕ
+        choices.innerHTML = "";
+        choices.style.opacity = '0';
+        gameText.innerHTML = "";
 
-    // Скрываем все объекты
-    allFloaters.forEach(el => { if(el) el.style.display = 'none'; });
+        // Скрываем все объекты
+        allFloaters.forEach(el => { if(el) el.style.display = 'none'; });
 
-    // === ПОКАЗЫВАЕМ ПАНЕЛЬ ===
-    showScenePanel();
+        // === ПОКАЗЫВАЕМ ПАНЕЛЬ ===
+        showScenePanel();
 
         // Меняем фон
         if (scene.background === 'none') {
             bg.style.backgroundImage = 'none';
             bg.style.backgroundColor = 'black';
         } else if (!scene.isEVA) {
-    bg.style.backgroundImage = scene.background;
-}
-// === EVA: перехватываем до проявления фона ===
-if (scene.isEVA) {
-    isTransitioning = false;
-    startEVAMode();
-    return;
-}
+            bg.style.backgroundImage = scene.background;
+        }
+
+        // === EVA: перехватываем до проявления фона ===
+        if (scene.isEVA) {
+            isTransitioning = false;
+            startEVAMode();
+            return;
+        }
+
         // ШАГ 3: ПРОЯВЛЕНИЕ
         setTimeout(() => {
             bg.style.opacity = '1';
             gameContainer.style.opacity = '1';
-            if (scene.background !== 'none') bg.classList.add('camera-active');
+
+            // === НОВОЕ: добавляем camera-active только если его ещё нет ===
+            if (scene.background !== 'none' && !bg.classList.contains('camera-active')) {
+                bg.classList.add('camera-active');
+            }
 
             // Показываем еду/предметы
             if (scene.floatingItems) {
@@ -364,89 +439,104 @@ if (scene.isEVA) {
                 });
             }
 
-            
-                if (scene.isCabin) {
-                    isTransitioning = false;  // Снимаем замок, чтобы можно было кликать
-                    startCabinMode();
-                    return;
+            if (scene.isCabin) {
+                isTransitioning = false;
+                startCabinMode();
+                return;
+            }
+
+            typeWriter(scene.text, gameText, 30, () => {
+                // --- ЗАПУСК АВАРИЙНОГО УВЕДОМЛЕНИЯ ---
+                if (scene.triggerAlert) {
+                    setTimeout(() => {
+                        showAlertNotification();
+                    }, 1500);
                 }
-                typeWriter(scene.text, gameText, 30, () => {
-                    //--- ЗАПУСК АВАРИЙНОГО УВЕДОМЛЕНИЯ ---
-                    if (scene.triggerAlert) {
-                        setTimeout(() => {
-                            showAlertNotification();
-                        }, 1500);
+
+                // Создаем кнопки
+                scene.options.forEach(opt => {
+                    const btn = document.createElement('button');
+                    btn.textContent = opt.text;
+                    if (opt.customClass) {
+                        btn.classList.add(opt.customClass);
                     }
+                    if (opt.item) btn.dataset.item = opt.item;
 
-                    // Создаем кнопки
-                    scene.options.forEach(opt => {
-                        const btn = document.createElement('button');
-                        btn.textContent = opt.text;
-                        if (opt.customClass) {
-    btn.classList.add(opt.customClass);
-}
-                        if (opt.item) btn.dataset.item = opt.item;
+                    btn.onclick = () => {
+                        playClickSound();
+                        if (opt.readiness) {
+                            updateReadiness(opt.readiness);
+                        }
 
-                        btn.onclick = () => {
-    playClickSound();
-    // Начисляем очки, если они прописаны в опции
-    if (opt.readiness) {
-        updateReadiness(opt.readiness);
-    }
-    // --- ПОЛНАЯ КАЛИБРОВКА ---
-    if (opt.nextScene === 'calibration_full') {
-        startCalibration('full');
-        return;
-    }
+                        // --- ПОЛНАЯ КАЛИБРОВКА ---
+                        if (opt.nextScene === 'calibration_full') {
+                            startCalibration('full');
+                            return;
+                        }
 
-    // --- БЫСТРАЯ ПРОВЕРКА ---
-    if (opt.nextScene === 'calibration_fast') {
-        startCalibration('fast');
-        return;
-    }
+                        // --- БЫСТРАЯ ПРОВЕРКА ---
+                        if (opt.nextScene === 'calibration_fast') {
+                            startCalibration('fast');
+                            return;
+                        }
 
-    // --- ИЛЛЮМИНАТОР ---
-    if (opt.nextScene === 'window_view') {
+                        // --- ИЛЛЮМИНАТОР ---
+                        if (opt.nextScene === 'window_view') {
+                            bg.style.opacity = '0';
+                            gameContainer.style.opacity = '0';
+                            allFloaters.forEach(el => { if(el) el.style.opacity = '0'; });
 
-        bg.style.opacity = '0';
-        gameContainer.style.opacity = '0';
-        allFloaters.forEach(el => { if(el) el.style.opacity = '0'; });
+                            setTimeout(() => {
+                                renderScene(opt.nextScene);
+                            }, 2000);
 
-        setTimeout(() => {
-            renderScene(opt.nextScene);
-        }, 2000);
+                            return;
+                        }
 
-        return;
-    }
+                        // --- ОБЫЧНАЯ СЦЕНА ---
+                        renderScene(opt.nextScene);
+                    };
 
-    // --- ОБЫЧНАЯ СЦЕНА ---
-    renderScene(opt.nextScene);
-};
+                    // ПОДСВЕТКА ПРИ НАВЕДЕНИИ
+                    btn.onmouseenter = () => {
+                        if (btn.dataset.item) {
+                            const target = document.getElementById(`floating-object-${btn.dataset.item}`);
+                            if (target) target.classList.add('highlight-item');
+                        }
+                    };
+                    btn.onmouseleave = () => {
+                        if (btn.dataset.item) {
+                            const target = document.getElementById(`floating-object-${btn.dataset.item}`);
+                            if (target) target.classList.remove('highlight-item');
+                        }
+                    };
 
-                        // ПОДСВЕТКА ПРИ НАВЕДЕНИИ
-                        btn.onmouseenter = () => {
-                            if (btn.dataset.item) {
-                                const target = document.getElementById(`floating-object-${btn.dataset.item}`);
-                                if (target) target.classList.add('highlight-item');
-                            }
-                        };
-                        btn.onmouseleave = () => {
-                            if (btn.dataset.item) {
-                                const target = document.getElementById(`floating-object-${btn.dataset.item}`);
-                                if (target) target.classList.remove('highlight-item');
-                            }
-                        };
-
+                    // === НОВОЕ: фиксированные кнопки добавляем в body, остальные — в панель ===
+                    if (opt.customClass === 'window-btn-fixed') {
+                        btn.dataset.fixedExtra = 'true';
+                        btn.style.opacity = '0';
+                        btn.style.transition = 'opacity 1s ease';
+                        document.body.appendChild(btn);
+                        setTimeout(() => { btn.style.opacity = '1'; }, 600);
+                    } else {
                         choices.appendChild(btn);
-                    });
-            setTimeout(() => { choices.style.opacity = '1'; }, 500);
-        });
-    }, 100);
-}, 2000);
+                    }
+                });
+
+                choices.style.opacity = '1';   // сам контейнер сразу видимый, кнопки внутри появятся через CSS-анимацию
+            });
+        }, 100);
+    }, 2000);
 }
+
 function startCalibration(mode) {
     hideScenePanel();
 
+ document.querySelectorAll('[data-fixed-extra="true"]').forEach(el => {
+        el.style.transition = 'opacity 0.6s ease';
+        el.style.opacity = '0';
+        setTimeout(() => el.remove(), 600);
+    });
 
     bg.style.filter = "brightness(0.5)";
 
@@ -460,13 +550,15 @@ function startCalibration(mode) {
     const content = document.createElement("div");
     content.classList.add("calibration-content");
     content.innerHTML = `
-        <div id="cal-title">
-            СПЕКТРОМЕТР-МКС v2.14<br>
-            РЕЖИМ: ${mode === 'full' ? 'ПОЛНАЯ' : 'БЫСТРАЯ'} КАЛИБРОВКА
-        </div>
-        <br>
-        <div id="cal-log"></div>
-    `;
+    <div id="cal-title">
+        СПЕКТРОМЕТР-МКС v2.14<br>
+        РЕЖИМ: ${mode === 'full' ? 'ПОЛНАЯ' : 'БЫСТРАЯ'} КАЛИБРОВКА
+    </div>
+    <br>
+    <div id="cal-hint">УПРАВЛЕНИЕ:&nbsp;&nbsp;←&nbsp;&nbsp;→</div>
+    <br>
+    <div id="cal-log"></div>
+`;
     module.appendChild(content);
 
     document.body.appendChild(module);
@@ -878,6 +970,13 @@ function updateReadiness(points) {
 }
 // СООБЩЕНИЕ ОТ КОЛЛЕГИ (внутренняя связь)
 function showCrewMessage() {
+    hideScenePanel(); // Гасим панель
+
+document.querySelectorAll('[data-fixed-extra="true"]').forEach(el => {
+        el.style.transition = 'opacity 0.6s ease';
+        el.style.opacity = '0';
+        setTimeout(() => el.remove(), 600);
+    });
 
     // Воспроизводим звук уведомления
     const notificationSound = new Audio('audio/notification.mp3');
@@ -934,6 +1033,13 @@ function showCrewMessage() {
 }
 // === АВАРИЙНОЕ УВЕДОМЛЕНИЕ ПОД HUD ===
 function showAlertNotification() {
+
+document.querySelectorAll('[data-fixed-extra="true"]').forEach(el => {
+        el.style.transition = 'opacity 0.6s ease';
+        el.style.opacity = '0';
+        setTimeout(() => el.remove(), 600);
+    });
+
     // Воспроизводим звук уведомления (тот же, что у Алекса)
     const notificationSound = new Audio('audio/notification.mp3');
     notificationSound.volume = 0.5;
@@ -954,6 +1060,7 @@ function showAlertNotification() {
     alert.onclick = () => {
         playClickSound();
         alert.remove();
+        hideScenePanel();      // Гасим панель
         showAlertMessage();
     };
 }
@@ -1139,7 +1246,7 @@ function startCabinMode() {
         if (currentScene === 'cabin') {
             showAlertNotification();
         }
-    }, 20000);
+    }, 8000);
 }
 
 // === РЕЖИМ ВЫХОДА В КОСМОС ===

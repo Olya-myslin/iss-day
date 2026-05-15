@@ -24,20 +24,25 @@
     <img id="floating-object-3" class="floater" src="" alt="item3" style="display: none; opacity: 0;">
     
     <div class="content">
-        <div id="game-container">
-            
-            <!-- Заголовок в две строки -->
-            <h1 id="start-title">ОДИН ДЕНЬ<br>НА МКС</h1>
+    <div id="game-container">
+        
+        <!-- Заголовок в две строки -->
+        <h1 id="start-title">ОДИН ДЕНЬ<br>НА МКС</h1>
 
-            <!-- Текст для игры -->
-            <div id="game-text" style="display: none;"></div>
-            
-            <div id="choices">
-                <button id="start-button">НАЧАТЬ ПЕРВЫЙ ДЕНЬ</button>
-            </div>
-
+        <!-- Стартовая кнопка остаётся в центре -->
+        <div id="start-choices">
+            <button id="start-button">НАЧАТЬ ПЕРВЫЙ ДЕНЬ</button>
         </div>
+
     </div>
+</div>
+<div id="scene-panel" class="hidden">
+    <div class="scene-panel-content">
+        <div id="game-text"></div>
+        <div id="choices"></div>
+    </div>
+</div>
+
 
     <script src="script.js"></script>
 </body>

@@ -14,6 +14,7 @@ const obj2 = document.getElementById('floating-object-2');
 const obj3 = document.getElementById('floating-object-3');
 const allFloaters = [obj1, obj2, obj3];
 
+const scenePanel = document.getElementById('scene-panel');
 // 2. ГЕНЕРАЦИЯ ЗВЕЗД 
 for (let i = 0; i < 120; i++) {
     const star = document.createElement('div');
@@ -73,6 +74,35 @@ function clearCabinObjects() {
         clearTimeout(cabinAlertTimer);
         cabinAlertTimer = null;
     }
+}
+// === ПАНЕЛЬ СЦЕН ===
+function showScenePanel() {
+    if (!scenePanel) return;
+    if (scenePanel.classList.contains('visible')) return;
+
+    scenePanel.classList.remove('hidden');
+
+    gameText.style.opacity = '1';
+    choices.style.opacity = '1';
+
+    requestAnimationFrame(() => {
+        scenePanel.classList.add('visible');
+    });
+}
+
+function hideScenePanel() {
+    if (!scenePanel) return;
+    if (!scenePanel.classList.contains('visible')) return;
+
+    // Просто гасим панель целиком — текст внутри гаснет вместе с ней
+    scenePanel.classList.remove('visible');
+
+    // Через 1 сек (когда панель уже невидима) — очищаем содержимое
+    setTimeout(() => {
+        scenePanel.classList.add('hidden');
+        gameText.innerHTML = "";
+        choices.innerHTML = "";
+    }, 1000);
 }
 // 6. СЦЕНАРИЙ ИГРЫ (Story)
 const story = {
@@ -292,13 +322,16 @@ function renderScene(sceneKey) {
     clearCabinObjects();
 
     setTimeout(() => {
-        // ШАГ 2: ПОДГОТОВКА В ТЕМНОТЕ
-        choices.innerHTML = "";
-        choices.style.opacity = '0';
-        gameText.innerHTML = "";
+    // ШАГ 2: ПОДГОТОВКА В ТЕМНОТЕ
+    choices.innerHTML = "";
+    choices.style.opacity = '0';
+    gameText.innerHTML = "";
 
-        // Скрываем все объекты
-        allFloaters.forEach(el => { if(el) el.style.display = 'none'; });
+    // Скрываем все объекты
+    allFloaters.forEach(el => { if(el) el.style.display = 'none'; });
+
+    // === ПОКАЗЫВАЕМ ПАНЕЛЬ ===
+    showScenePanel();
 
         // Меняем фон
         if (scene.background === 'none') {
@@ -412,9 +445,9 @@ if (scene.isEVA) {
 }, 2000);
 }
 function startCalibration(mode) {
+    hideScenePanel();
 
-    gameText.style.opacity = "0";
-    choices.style.opacity = "0";
+
     bg.style.filter = "brightness(0.5)";
 
     const module = document.createElement("div");
@@ -710,16 +743,15 @@ function finishCalibration(module) {
     module.querySelector(".calibration-content").appendChild(finishBtn);
 
     finishBtn.onclick = () => {
-
-        module.remove();
-
-        bg.style.filter = "brightness(1)";
-        gameText.style.opacity = "1";
-        choices.style.opacity = "1";
-
-        // Очищаем текст и кнопки перед печатью
-        gameText.innerHTML = "";
-        choices.innerHTML = "";
+    module.remove();
+    bg.style.filter = "brightness(1)";
+    
+    // Возвращаем панель
+    showScenePanel();
+    gameText.style.opacity = "1";
+    choices.style.opacity = "1";
+    gameText.innerHTML = "";
+    choices.innerHTML = "";
 
         // Печатаем текст с эффектом typeWriter
         typeWriter("Калибровка завершена.<br>Отчёт ушёл на Землю.", gameText, 40, () => {
@@ -777,12 +809,14 @@ function createHUD() {
         startTitle.style.display = 'none';
         starLayer.style.display = 'none';
         
-        // Стираем кнопку "Начать", пока экран черный
-        choices.innerHTML = ""; 
-        choices.style.opacity = '0';
+        const startChoices = document.getElementById('start-choices');
+if (startChoices) startChoices.style.display = 'none';
+choices.innerHTML = ""; 
+choices.style.opacity = '0';
 
         bg.style.backgroundImage = 'url("images/first.png")';
         gameText.style.display = 'block';
+        showScenePanel();
         
         if(obj1) {
             obj1.style.display = 'block';
@@ -1036,6 +1070,7 @@ function showAlertMessage() {
     showStep();
 }
 function startCabinMode() {
+    hideScenePanel();
     // Очищаем старые элементы каюты
     clearCabinObjects();
 
@@ -1111,6 +1146,7 @@ function startCabinMode() {
 let breathingAudio = null;
 
 function startEVAMode() {
+    hideScenePanel();
     // Сразу прячем фон до того, как он успеет мелькнуть
     bg.style.transition = 'none';
     bg.style.opacity = '0';
@@ -1125,8 +1161,7 @@ function startEVAMode() {
     setTimeout(() => {
         bg.style.opacity = '1';
         gameContainer.style.opacity = '1';
-        gameText.style.transition = 'opacity 2s ease';
-        gameText.style.opacity = '1';
+        
     }, 50);
 
     // Плавно гасим основную музыку
@@ -1154,34 +1189,53 @@ function startEVAMode() {
         }
     }, 100);
 
-    // Печатаем текст на чёрном фоне
-    typeWriter(
-        "Люк открывается.<br>Тишина.<br>Абсолютная, оглушающая тишина.<br>Под тобой — Земля. Над тобой — всё остальное.",
-        gameText,
-        40,
-        () => {
-            // Держим текст 4 секунды
+    // Создаём отдельный текст для EVA (не зависит от панели)
+const evaText = document.createElement('div');
+evaText.id = 'eva-text';
+evaText.style.cssText = `
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: 'Inter', sans-serif;
+    font-weight: 300;
+    font-size: 22px;
+    line-height: 1.6;
+    letter-spacing: 2px;
+    color: white;
+    text-align: center;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
+    max-width: 800px;
+    z-index: 50;
+    opacity: 1;
+    transition: opacity 2s ease;
+`;
+document.body.appendChild(evaText);
+
+// Печатаем текст в новый элемент
+typeWriter(
+    "Люк открывается.<br>Тишина.<br>Абсолютная, оглушающая тишина.<br>Под тобой — Земля. Над тобой — всё остальное.",
+    evaText,
+    40,
+    () => {
+        // Держим текст 4 секунды
+        setTimeout(() => {
+            evaText.style.opacity = '0';
+
             setTimeout(() => {
-                // Плавно скрываем текст
-                gameText.style.transition = 'opacity 2s ease';
-                gameText.style.opacity = '0';
+                evaText.remove();   // удаляем после исчезновения
+                
+                // Меняем фон
+                bg.style.transition = 'none';
+                bg.style.opacity = '0';
+                bg.style.backgroundImage = 'url("images/spacesuit3.png")';
+                bg.style.backgroundColor = 'transparent';
 
-                // Ждём пока текст исчезнет, потом меняем фон
-setTimeout(() => {
-    // Сначала меняем картинку пока фон НЕ виден (opacity = 0 был в самом начале функции, но тут мы его на 1 уже подняли — поэтому опять опускаем)
-    bg.style.transition = 'none';
-    bg.style.opacity = '0';
-    bg.style.backgroundImage = 'url("images/spacesuit3.png")';
-    bg.style.backgroundColor = 'transparent';
-
-    // Даём браузеру 50мс отрисовать чёрный с уже подгруженным фоном
-    setTimeout(() => {
-        bg.style.transition = 'opacity 3s ease';
-        bg.style.opacity = '1';
-    }, 50);
-}, 2000);
-
-            }, 4000);
-        }
-    );
-}
+                setTimeout(() => {
+                    bg.style.transition = 'opacity 3s ease';
+                    bg.style.opacity = '1';
+                }, 50);
+            }, 2000);
+        }, 4000);
+    }
+)}

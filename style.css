@@ -671,3 +671,159 @@ button:hover {
     transition: opacity 1.5s ease, border-color 0.5s ease, background 0.5s ease;
     white-space: pre-line;
 }
+/* === ИГРОВАЯ ПАНЕЛЬ ВНИЗУ === */
+#scene-panel {
+    position: fixed;
+    bottom: 50px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 75%;
+    max-width: 1100px;
+    height: 210px;
+    z-index: 20;
+
+    border: 1.5px solid white;
+    box-shadow: 0 0 12px rgba(255, 255, 255, 0.4);
+
+    opacity: 0;
+    transition: opacity 1s ease;
+    pointer-events: none;
+}
+
+#scene-panel.visible {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+#scene-panel.hidden {
+    display: none;
+}
+
+.scene-panel-content {
+    position: relative;
+    z-index: 2;
+    padding: 30px 50px;
+    backdrop-filter: blur(3px);
+    background: rgba(10, 15, 25, 0.25);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: 20px;
+}
+
+/* SVG-рамка как в калибровке, но быстрее */
+.scene-panel-svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 3;
+}
+
+.scene-panel-rect {
+    fill: none;
+    stroke: white;
+    stroke-width: 2;
+    stroke-dasharray: 2600;
+    stroke-dashoffset: 2600;
+    filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.4));
+    transition: stroke-dashoffset 2.1s ease, filter 0.6s ease;
+    /* было 2.5s в калибровке — теперь ~15% быстрее */
+}
+
+.scene-panel-rect.glow {
+    filter: drop-shadow(0 0 14px rgba(255, 255, 255, 0.6));
+}
+
+.scene-panel-content {
+    position: relative;
+    z-index: 2;
+    padding: 35px 50px;
+    backdrop-filter: blur(3px);
+    background: rgba(10, 15, 25, 0.25);
+    min-height: 180px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start; 
+    gap: 20px;
+}
+
+/* Переопределяем #game-text внутри панели */
+#scene-panel #game-text {
+    font-family: monospace;
+    font-weight: 400;
+    font-size: 17px;
+    letter-spacing: 2px;
+    line-height: 1.6;
+    color: white;
+    text-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
+    text-align: left;
+
+    /* Сбрасываем старые flex-настройки */
+    min-height: auto;
+    margin: 0;
+    display: block;
+    max-width: 100%;
+}
+
+/* Кнопки выбора — текстом со стрелочкой, без рамки */
+#scene-panel #choices {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 30px;
+    min-height: 30px;
+    opacity: 0;
+    transition: opacity 1s ease;
+}
+
+#scene-panel #choices button {
+    background: transparent;
+    border: none;
+    padding: 0;
+    margin: 0;
+
+    font-family: monospace;
+    font-size: 15px;
+    letter-spacing: 2px;
+    text-transform: none;
+    color: rgba(255, 255, 255, 0.75);
+
+    cursor: pointer;
+    transition: color 0.3s ease, text-shadow 0.3s ease, transform 0.3s ease;
+}
+
+/* Стрелочка слева от текста, появляется при наведении */
+#scene-panel #choices button::before {
+    content: "  ";   /* пустое место — резервируем ширину под стрелку */
+    display: inline-block;
+    width: 18px;
+    color: white;
+    transition: content 0.2s ease;
+}
+
+#scene-panel #choices button:hover {
+    color: white;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.6);
+}
+
+#scene-panel #choices button:hover::before {
+    content: "> ";
+}
+
+/* Кнопка иллюминатора в панели — отдельный стиль */
+#scene-panel #choices button.window-btn {
+    /* Сбрасываем фиксированное позиционирование из старого .window-btn */
+    position: static !important;
+    width: auto !important;
+    height: auto !important;
+    padding: 0 !important;
+    font-size: 15px !important;
+    letter-spacing: 2px !important;
+    line-height: 1.6 !important;
+    margin: 0 !important;
+}

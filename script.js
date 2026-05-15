@@ -1325,24 +1325,242 @@ typeWriter(
     evaText,
     40,
     () => {
-        // Держим текст 4 секунды
+        // После окончания печати — показываем кнопку
         setTimeout(() => {
-            evaText.style.opacity = '0';
+            const btn = document.createElement('button');
+            btn.textContent = 'Приступить к ремонту';
+            btn.id = 'eva-continue-btn';
+            btn.style.cssText = `
+                position: fixed;
+                top: 70%;
+                left: 50%;
+                transform: translateX(-50%);
+                padding: 15px 35px;
+                font-family: monospace;
+                font-size: 14px;
+                letter-spacing: 3px;
+                color: white;
+                background: transparent;
+                border: 1px solid rgba(255, 255, 255, 0.5);
+                cursor: pointer;
+                z-index: 60;
+                opacity: 0;
+                transition: opacity 1.5s ease, background 0.4s ease, border-color 0.4s ease;
+            `;
+            document.body.appendChild(btn);
 
-            setTimeout(() => {
-                evaText.remove();   // удаляем после исчезновения
+            // Плавное появление
+            setTimeout(() => { btn.style.opacity = '1'; }, 50);
+
+            btn.onmouseenter = () => {
+                btn.style.background = 'rgba(255, 255, 255, 0.08)';
+                btn.style.borderColor = 'white';
+            };
+            btn.onmouseleave = () => {
+                btn.style.background = 'transparent';
+                btn.style.borderColor = 'rgba(255, 255, 255, 0.5)';
+            };
+
+            btn.onclick = () => {
+                playClickSound();
                 
-                // Меняем фон
-                bg.style.transition = 'none';
-                bg.style.opacity = '0';
-                bg.style.backgroundImage = 'url("images/spacesuit3.png")';
-                bg.style.backgroundColor = 'transparent';
-
+                // Плавно прячем текст и кнопку
+                evaText.style.opacity = '0';
+                btn.style.opacity = '0';
+                
                 setTimeout(() => {
-                    bg.style.transition = 'opacity 3s ease';
-                    bg.style.opacity = '1';
-                }, 50);
-            }, 2000);
-        }, 4000);
+                    evaText.remove();
+                    btn.remove();
+                    startAntennaRepair();
+                }, 1500);
+            };
+        }, 2000);
     }
 )}
+
+// === МИНИ-ИГРА: РЕМОНТ АНТЕННЫ ===
+function startAntennaRepair() {
+    // Чёрный фон
+    bg.style.transition = 'opacity 1s ease';
+    bg.style.opacity = '0';
+    
+    setTimeout(() => {
+        bg.style.backgroundImage = 'none';
+        bg.style.backgroundColor = 'black';
+        bg.style.opacity = '1';
+    }, 1000);
+
+    // Создаём модуль игры
+    const module = document.createElement('div');
+    module.id = 'antenna-module';
+    module.innerHTML = `
+        <svg class="antenna-frame-svg" viewBox="0 0 1000 600" preserveAspectRatio="none">
+            <rect class="antenna-frame-rect" x="1" y="1" width="998" height="598"></rect>
+        </svg>
+
+        <div class="antenna-content">
+            <div class="antenna-header">
+                <div class="antenna-header-left">
+                    <div class="antenna-title">РЕМОНТ АНТЕННЫ — ТРАССИРОВКА КОНТУРА</div>
+                    <div class="antenna-goal">ЦЕЛЬ <span id="current-goal">1</span> / 3</div>
+                </div>
+                <div class="antenna-header-right">
+                    <div class="antenna-timer">ВРЕМЯ: <span id="antenna-timer">00:60</span></div>
+                    <div class="antenna-attempts">
+                        ПОПЫТКИ: 
+                        <span class="attempt-dot active"></span>
+                        <span class="attempt-dot active"></span>
+                        <span class="attempt-dot active"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="antenna-field">
+                <svg class="antenna-grid" viewBox="0 0 900 460" preserveAspectRatio="xMidYMid meet">
+                    <!-- ЛИНИИ СВЯЗИ -->
+                    <g class="grid-lines">
+                        <!-- Горизонтальные (4 ряда: y = 60, 180, 300, 420) -->
+                        <!-- Ряд 1 -->
+                        <line x1="60"  y1="60"  x2="180" y2="60"></line>
+                        <line x1="180" y1="60"  x2="300" y2="60"></line>
+                        <line x1="300" y1="60"  x2="420" y2="60"></line>
+                        <line x1="420" y1="60"  x2="540" y2="60"></line>
+                        <line x1="540" y1="60"  x2="660" y2="60"></line>
+                        <line x1="660" y1="60"  x2="780" y2="60"></line>
+
+                        <!-- Ряд 2 -->
+                        <line x1="60"  y1="180" x2="180" y2="180"></line>
+                        <line x1="180" y1="180" x2="300" y2="180"></line>
+                        <line x1="300" y1="180" x2="420" y2="180"></line>
+                        <line x1="420" y1="180" x2="540" y2="180"></line>
+                        <line x1="540" y1="180" x2="660" y2="180"></line>
+                        <line x1="660" y1="180" x2="780" y2="180"></line>
+                        <line x1="780" y1="180" x2="840" y2="180"></line>
+
+                        <!-- Ряд 3 -->
+                        <line x1="60"  y1="300" x2="180" y2="300"></line>
+                        <line x1="180" y1="300" x2="300" y2="300"></line>
+                        <line x1="300" y1="300" x2="420" y2="300"></line>
+                        <line x1="420" y1="300" x2="540" y2="300"></line>
+                        <line x1="540" y1="300" x2="660" y2="300"></line>
+                        <line x1="660" y1="300" x2="780" y2="300"></line>
+
+                        <!-- Ряд 4 -->
+                        <line x1="60"  y1="420" x2="180" y2="420"></line>
+                        <line x1="180" y1="420" x2="300" y2="420"></line>
+                        <line x1="300" y1="420" x2="420" y2="420"></line>
+                        <line x1="420" y1="420" x2="540" y2="420"></line>
+                        <line x1="540" y1="420" x2="660" y2="420"></line>
+                        <line x1="660" y1="420" x2="780" y2="420"></line>
+
+                        <!-- Вертикальные связи -->
+                        <line x1="60"  y1="60"  x2="60"  y2="180"></line>
+                        <line x1="60"  y1="180" x2="60"  y2="300"></line>
+                        <line x1="60"  y1="300" x2="60"  y2="420"></line>
+
+                        <line x1="180" y1="60"  x2="180" y2="180"></line>
+                        <line x1="180" y1="180" x2="180" y2="300"></line>
+                        <line x1="180" y1="300" x2="180" y2="420"></line>
+
+                        <line x1="300" y1="60"  x2="300" y2="180"></line>
+                        <line x1="300" y1="180" x2="300" y2="300"></line>
+                        <line x1="300" y1="300" x2="300" y2="420"></line>
+
+                        <line x1="420" y1="60"  x2="420" y2="180"></line>
+                        <line x1="420" y1="180" x2="420" y2="300"></line>
+                        <line x1="420" y1="300" x2="420" y2="420"></line>
+
+                        <line x1="540" y1="60"  x2="540" y2="180"></line>
+                        <line x1="540" y1="180" x2="540" y2="300"></line>
+                        <line x1="540" y1="300" x2="540" y2="420"></line>
+
+                        <line x1="660" y1="60"  x2="660" y2="180"></line>
+                        <line x1="660" y1="180" x2="660" y2="300"></line>
+                        <line x1="660" y1="300" x2="660" y2="420"></line>
+
+                        <line x1="780" y1="60"  x2="780" y2="180"></line>
+                        <line x1="780" y1="180" x2="780" y2="300"></line>
+                        <line x1="780" y1="300" x2="780" y2="420"></line>
+                    </g>
+
+                    <!-- УЗЛЫ -->
+                    <g class="grid-nodes">
+                        <!-- Ряд 1 (y=60) -->
+                        <circle cx="60"  cy="60"  r="8" class="node safe"></circle>
+                        <circle cx="180" cy="60"  r="8" class="node safe"></circle>
+                        <circle cx="300" cy="60"  r="8" class="node safe"></circle>
+                        <circle cx="420" cy="60"  r="8" class="node corrupted"></circle>
+                        <circle cx="540" cy="60"  r="8" class="node safe"></circle>
+                        <circle cx="660" cy="60"  r="8" class="node safe"></circle>
+                        <circle cx="780" cy="60"  r="8" class="node safe"></circle>
+
+                        <!-- Ряд 2 (y=180) — стартовый ряд -->
+                        <circle cx="60"  cy="180" r="10" class="node start"></circle>
+                        <circle cx="180" cy="180" r="8"  class="node safe"></circle>
+                        <circle cx="300" cy="180" r="10" class="node goal" data-goal="1"></circle>
+                        <circle cx="420" cy="180" r="8"  class="node safe"></circle>
+                        <circle cx="540" cy="180" r="8"  class="node corrupted"></circle>
+                        <circle cx="660" cy="180" r="8"  class="node safe"></circle>
+                        <circle cx="780" cy="180" r="8"  class="node safe"></circle>
+                        <circle cx="840" cy="180" r="8"  class="node safe"></circle>
+
+                        <!-- Ряд 3 (y=300) -->
+                        <circle cx="60"  cy="300" r="8" class="node safe"></circle>
+                        <circle cx="180" cy="300" r="8" class="node corrupted"></circle>
+                        <circle cx="300" cy="300" r="8" class="node safe"></circle>
+                        <circle cx="420" cy="300" r="10" class="node goal" data-goal="2"></circle>
+                        <circle cx="540" cy="300" r="8" class="node safe"></circle>
+                        <circle cx="660" cy="300" r="8" class="node safe"></circle>
+                        <circle cx="780" cy="300" r="8" class="node corrupted"></circle>
+
+                        <!-- Ряд 4 (y=420) -->
+                        <circle cx="60"  cy="420" r="8" class="node safe"></circle>
+                        <circle cx="180" cy="420" r="8" class="node safe"></circle>
+                        <circle cx="300" cy="420" r="8" class="node corrupted"></circle>
+                        <circle cx="420" cy="420" r="8" class="node safe"></circle>
+                        <circle cx="540" cy="420" r="8" class="node safe"></circle>
+                        <circle cx="660" cy="420" r="8" class="node safe"></circle>
+                        <circle cx="780" cy="420" r="10" class="node goal" data-goal="3"></circle>
+                    </g>
+
+                    <!-- НОМЕРА ЦЕЛЕЙ -->
+                    <g class="goal-labels">
+                        <text x="300" y="184" class="goal-text">1</text>
+                        <text x="420" y="304" class="goal-text">2</text>
+                        <text x="780" y="424" class="goal-text">3</text>
+                    </g>
+
+                    <!-- ВОЛНЫ ПОМЕХ (статичные пока) -->
+                    <circle cx="180" cy="60" r="7" class="wave wave-1"></circle>
+                    <circle cx="660" cy="420" r="7" class="wave wave-2"></circle>
+
+                    <!-- КУРСОР ИГРОКА -->
+                    <circle cx="60" cy="180" r="6" class="player-cursor"></circle>
+                </svg>
+            </div>
+
+            <div class="antenna-footer">
+                <div class="antenna-legend">
+                    <span><span class="legend-dot start"></span>СТАРТ</span>
+                    <span><span class="legend-dot goal"></span>ЦЕЛЬ</span>
+                    <span><span class="legend-dot corrupted"></span>ПОВРЕЖДЁННЫЙ</span>
+                    <span><span class="legend-dot wave"></span>ПОМЕХА</span>
+                </div>
+                <div class="antenna-hint">УПРАВЛЕНИЕ: ↑ ↓ ← →</div>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(module);
+
+    // Запускаем анимацию рамки
+    setTimeout(() => {
+        const rect = module.querySelector('.antenna-frame-rect');
+        rect.style.strokeDashoffset = '0';
+    }, 500);
+
+    // Плавное появление содержимого
+    setTimeout(() => {
+        module.querySelector('.antenna-content').style.opacity = '1';
+    }, 1500);
+}

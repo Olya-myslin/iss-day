@@ -6,7 +6,6 @@
 - HTML
 - CSS
 - JavaScript
-- Без фреймворков и библиотек
 
 ## Демо
 https://olya-myslin.github.io/iss-day/

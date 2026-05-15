@@ -1,0 +1,673 @@
+/* --- БАЗОВЫЕ НАСТРОЙКИ --- */
+* { 
+    margin: 0; 
+    padding: 0; 
+    box-sizing: border-box; 
+}
+
+body { 
+    background: black; 
+    height: 100vh; 
+    overflow: hidden; 
+    font-family: 'Inter', sans-serif; 
+    color: white; 
+}
+
+/* --- ФОН И ЭФФЕКТЫ --- */
+.background {
+    position: fixed; 
+    inset: 0;
+    background: url("images/earth.jpg") no-repeat center center;
+    background-size: cover;
+    z-index: 1;
+    opacity: 1;
+    transition: opacity 2s ease-in-out;
+}
+
+.stars { 
+    position: fixed; 
+    inset: 0; 
+    z-index: 2; 
+    pointer-events: none; 
+    transition: opacity 1.5s ease; 
+}
+
+.star { 
+    position: absolute; 
+    background: white; 
+    border-radius: 50%; 
+    opacity: 0.3; 
+    animation: twinkle infinite ease-in-out alternate; 
+}
+
+@keyframes twinkle {
+    0% { opacity: 0.2; transform: scale(0.8); box-shadow: 0 0 2px white; }
+    50% { opacity: 1; transform: scale(1.2); box-shadow: 0 0 10px white; }
+    100% { opacity: 0.2; transform: scale(0.8); box-shadow: 0 0 2px white; }
+}
+
+.overlay {
+    position: fixed; 
+    inset: 0; 
+    z-index: 3;
+    background: radial-gradient(circle at center, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.8) 100%);
+}
+
+/* --- КОНТЕНТ --- */
+.content {
+    position: fixed; 
+    inset: 0;
+    display: flex; 
+    justify-content: center; 
+    align-items: center;
+    z-index: 10;
+}
+
+#game-container { 
+    text-align: center; 
+    transition: opacity 2s ease-in-out; 
+}
+
+#start-title {
+    font-weight: 200; 
+    font-size: 80px; 
+    letter-spacing: 12px; 
+    line-height: 1.1; 
+    margin-bottom: 60px;
+    text-shadow: 0 0 15px rgba(255, 255, 255, 0.4), 0 0 35px rgba(255, 255, 255, 0.2);
+}
+
+#game-text {
+    font-family: 'Inter', sans-serif;
+    font-weight: 250;
+    font-size: 22px;
+    line-height: 1.3;
+    margin-bottom: 40px;
+    max-width: 900px;
+    color: white;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+    text-align: center;
+
+    /* === ФИКС ПРЫЖКОВ === */
+    min-height: 120px;
+    margin-left: auto;
+    margin-right: auto;
+    display: flex;
+    flex-direction: column;   /* строки текста идут друг под другом */
+    align-items: center;      /* центрируем по горизонтали */
+    justify-content: center;  /* и по вертикали */
+}
+
+#choices {
+    transition: opacity 1s ease-in-out;
+    
+    /* === ФИКС ПРЫЖКОВ === */
+    min-height: 60px;         /* Резервируем место под кнопки */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;          /* Если кнопок много — переносим на новую строку */
+}
+
+button {
+    font-family: 'Inter', sans-serif; 
+    font-weight: 300; 
+    padding: 18px 45px;
+    font-size: 14px; 
+    letter-spacing: 5px; 
+    text-transform: uppercase;
+    color: white; 
+    background: transparent; 
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    cursor: pointer; 
+    transition: all 0.5s ease; 
+    margin: 0 15px;
+}
+
+button:hover { 
+    border-color: white; 
+    background: rgba(255, 255, 255, 0.05); 
+}
+
+/* --- ЧАСЫ --- */
+.time {
+    position: fixed;
+    top: 40px;
+    left: 40px;
+    font-weight: 200;
+    font-size: 16px;
+    letter-spacing: 6px;
+    opacity: 0.6;
+    z-index: 100;
+}
+
+#colon { animation: blink 1s step-end infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+
+/* --- ЛЕТАЮЩИЕ ПРЕДМЕТЫ --- */
+/* Здесь мы используем классы для всех трех объектов */
+#floating-object-1, 
+#floating-object-2, 
+#floating-object-3 {
+    position: absolute;
+    top: 30%;
+    left: 50%;
+    width: 400px;
+    z-index: 5;
+    display: none;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 2s ease-in-out, filter 0.4s ease, transform 0.4s ease;
+}
+/* Будильник — увеличенный размер */
+.floater[src*="alarm.png"] {
+    width: 600px !important;
+}
+
+/* Анимации движения */
+#floating-object-1 { animation: floatAnim1 75s infinite alternate ease-in-out; }
+#floating-object-2 { animation: floatAnim2 62s infinite alternate ease-in-out; }
+#floating-object-3 { animation: floatAnim3 69s infinite alternate ease-in-out; }
+
+/* Эффект подсветки при наведении на кнопку */
+.highlight-item {
+    filter: drop-shadow(0 0 25px rgba(255, 255, 255, 0.9)) !important;
+    opacity: 1 !important;
+}
+
+/* Траектории полета */
+@keyframes floatAnim1 {
+    0% { transform: translate(-110%, -20%) rotate(-15deg); }
+    33% { transform: translate(-50%, -40%) rotate(10deg); }
+    66% { transform: translate(-130%, -30%) rotate(-5deg); }
+    100% { transform: translate(-110%, -20%) rotate(-15deg); }
+}
+
+@keyframes floatAnim2 {
+    0% { transform: translate(-50%, -60%) rotate(3deg); }
+    50% { transform: translate(10%, -20%) rotate(-6deg); }
+    100% { transform: translate(-80%, -50%) rotate(2deg); }
+}
+
+@keyframes floatAnim3 {
+    0% { transform: translate(-80%, -20%) rotate(-2deg); }
+    50% { transform: translate(20%, -60%) rotate(4deg); }
+    100% { transform: translate(-40%, -40%) rotate(-2deg); }
+}
+
+/* --- ЖИВАЯ КАМЕРА --- */
+@keyframes cameraBreathing {
+    0% { transform: scale(1) translate(0, 0); }
+    30% { transform: scale(1.06) translate(-0.5%, 0.3%); }
+    60% { transform: scale(1.03) translate(0.3%, -0.2%); }
+    100% { transform: scale(1) translate(0, 0); }
+}
+
+.camera-move {
+    animation: cameraBreathing 25s ease-in-out infinite;
+}
+/* Кнопка специально для иллюминатора */
+.window-btn {
+    position: fixed !important;
+    
+    /* РАСПОЛОЖЕНИЕ */
+    left: 3% !important;       /* Сильно левее */
+    top: 43% !important;       /* Подняли выше центра */
+    transform: none !important;
+    
+    /* РАЗМЕР И ФОРМА (Квадратная) */
+    width: 140px !important;
+    height: 80px !important;
+    padding: 10px !important;  /* Меньший внутренний отступ */
+    
+    /* ШРИФТ (мельче) */
+    font-size: 11px !important;
+    letter-spacing: 2px !important;
+    line-height: 1.4 !important;
+    
+    margin: 0 !important;
+    z-index: 20;
+}
+
+
+/* Анимация движения Земли */
+@keyframes earthDrift {
+    0% { transform: scale(1.05) translateY(0); }
+    50% { transform: scale(1.08) translateY(-20px); }
+    100% { transform: scale(1.05) translateY(0); }
+}
+
+.background {
+    transition: opacity 2s ease-in-out, filter 1.5s ease;
+}
+.calibration-module {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 75%;
+    height: 60%;
+    z-index: 20;
+}
+.calibration-fill {
+    position: absolute;
+    inset: 0;
+    backdrop-filter: blur(6px);
+    background: rgba(255,255,255,0.05);
+    opacity: 0;
+    transition: opacity 0.8s ease;
+    pointer-events: none;
+}
+.calibration-svg {
+    width: 100%;
+    height: 100%;
+}
+
+.calibration-rect {
+    fill: none;
+    stroke: white;
+    stroke-width: 1;
+    filter: drop-shadow(0 0 6px rgba(255,255,255,0.4));
+}
+.calibration-rect {
+    fill: none;
+    stroke: white;
+    stroke-width: 1;
+
+    stroke-dasharray: 3200;
+    stroke-dashoffset: 3200;
+
+    filter: drop-shadow(0 0 6px rgba(255,255,255,0.4));
+
+    transition: stroke-dashoffset 2.5s ease,
+                filter 0.6s ease;
+}
+.calibration-glow {
+    filter: drop-shadow(0 0 14px rgba(255,255,255,0.6));
+    transition: filter 0.6s ease;
+}
+.calibration-content {
+    position: absolute;
+    inset: 0;
+    padding: 40px 60px;
+    font-family: monospace;
+    font-size: 16px;
+    letter-spacing: 2px;
+    color: white;
+    opacity: 0;
+    transition: opacity 1s ease;
+    z-index: 3;
+}
+.calibration-bar {
+    position: absolute;
+    bottom: 80px;
+    left: 60px;
+    right: 60px;
+    height: 2px;
+    background: rgba(255,255,255,0.3);
+
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.calibration-zone {
+    position: absolute;
+    left: 45%;
+    width: 10%;
+    height: 100%;
+    background: rgba(255,255,255,0.8);
+}
+
+.calibration-marker {
+    position: absolute;
+    top: -4px;
+    width: 2px;
+    height: 10px;
+    background: white;
+    box-shadow: 0 0 8px rgba(255,255,255,0.6);
+}
+/* --- HUD СТАТУСА --- */
+#hud-status {
+    position: fixed;
+    top: 80px; /* Ниже часов */
+    left: 40px;
+    width: 220px;
+    height: 60px;
+    z-index: 100;
+    opacity: 0; /* Скрыт в начале */
+    transition: opacity 1s ease;
+}
+
+.hud-svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.hud-rect {
+    fill: none;
+    stroke: white;
+    stroke-width: 1;
+    stroke-dasharray: 600;
+    stroke-dashoffset: 600;
+    opacity: 0.6;  
+    filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.3));  
+    transition: stroke-dashoffset 1.5s ease;
+}
+
+.hud-content {
+    position: absolute;
+    inset: 0;
+    padding: 10px 15px;
+    font-family: monospace;
+    font-size: 13px;
+    letter-spacing: 1px;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+}
+
+#hud-status.visible .hud-content {
+    opacity: 0.6;  /* Та же приглушённость, что у часов */
+}
+
+@keyframes hud-pulse {
+    0%   { filter: brightness(1) drop-shadow(0 0 3px rgba(255, 255, 255, 0.3)); }
+    50%  { filter: brightness(2) drop-shadow(0 0 15px rgba(255, 255, 255, 0.9)); }
+    100% { filter: brightness(1) drop-shadow(0 0 3px rgba(255, 255, 255, 0.3)); }
+}
+
+.pulse-active {
+    animation: hud-pulse 0.6s ease-out;
+}
+
+/* СООБЩЕНИЕ ОТ КОЛЛЕГИ (внутренняя связь) */
+.crew-message {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.95);
+    width: 520px;
+    max-width: 90vw;
+    padding: 30px 35px;
+    
+    background: rgba(10, 15, 25, 0.7);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    
+    font-family: monospace;
+    color: rgba(255, 255, 255, 0.85);
+    
+    z-index: 200;
+    
+    opacity: 0;
+    transition: opacity 0.8s ease, transform 0.8s ease;
+    
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+}
+
+.crew-message.visible {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+}
+
+.crew-header {
+    font-size: 12px;
+    letter-spacing: 3px;
+    color: rgba(255, 255, 255, 0.6);
+    margin-bottom: 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    padding-bottom: 10px;
+}
+
+.crew-body {
+    font-size: 15px;
+    line-height: 1.5;
+    margin-bottom: 15px;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.crew-signature {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.5);
+    text-align: right;
+    margin-bottom: 25px;
+    font-style: italic;
+}
+
+.crew-choices {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-height: 150px;  
+}
+
+.crew-choices button {
+    padding: 12px 20px;
+    font-size: 12px;
+    letter-spacing: 2px;
+    margin: 0;
+    width: 100%;
+    
+    /* Плавное появление */
+    opacity: 0;
+    animation: fadeInButton 0.8s ease forwards;
+}
+
+/* Каждая следующая кнопка появляется чуть позже */
+.crew-choices button:nth-child(1) { animation-delay: 0s; }
+.crew-choices button:nth-child(2) { animation-delay: 0.2s; }
+.crew-choices button:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes fadeInButton {
+    from { 
+        opacity: 0;
+        transform: translateY(5px);
+    }
+    to { 
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+/* --- АВАРИЙНОЕ УВЕДОМЛЕНИЕ ПОД HUD --- */
+#alert-notification {
+    position: fixed;
+    top: 160px;            /* Под HUD-блоком */
+    left: 40px;
+    width: 220px;
+    padding: 8px 12px;
+    
+    font-family: monospace;
+    font-size: 13px;
+    letter-spacing: 1px;
+    color: #ff5555;
+    
+    cursor: pointer;
+    z-index: 100;
+    
+    opacity: 0;
+    transition: opacity 0.6s ease;
+    
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+#alert-notification.visible {
+    opacity: 1;
+    animation: alert-pulse 1.2s ease-in-out infinite;
+}
+
+#alert-notification:hover {
+    color: #ff8888;
+}
+
+@keyframes alert-pulse {
+    0%   { text-shadow: 0 0 4px rgba(255, 85, 85, 0.4); }
+    50%  { text-shadow: 0 0 16px rgba(255, 85, 85, 1), 0 0 30px rgba(255, 85, 85, 0.6); }
+    100% { text-shadow: 0 0 4px rgba(255, 85, 85, 0.4); }
+}
+
+/* --- КРАСНОЕ ОКНО АВАРИЙНОГО СООБЩЕНИЯ (как у Алекса, но красное) --- */
+.alert-message {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.95);
+    width: 520px;
+    max-width: 90vw;
+    padding: 30px 35px;
+    
+    background: rgba(25, 10, 10, 0.75);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 85, 85, 0.6);
+    
+    font-family: monospace;
+    color: rgba(255, 220, 220, 0.85);
+    
+    z-index: 200;
+    
+    opacity: 0;
+    transition: opacity 0.8s ease, transform 0.8s ease;
+    
+    box-shadow: 0 0 25px rgba(255, 85, 85, 0.2);
+}
+
+.alert-message.visible {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+}
+
+.alert-header {
+    font-size: 12px;
+    letter-spacing: 3px;
+    color: rgba(255, 120, 120, 0.8);
+    margin-bottom: 20px;
+    border-bottom: 1px solid rgba(255, 85, 85, 0.3);
+    padding-bottom: 10px;
+}
+.alert-body {
+    font-size: 14px;
+    line-height: 1.6;
+    margin-bottom: 25px;
+    color: rgba(255, 230, 230, 0.95);
+    min-height: 120px;          /* Резервируем место под текст, чтобы не прыгало */
+}
+
+/* Кнопка появляется только после окончания печати */
+.alert-choices button.appearing {
+    opacity: 0;
+    animation: fadeInButton 0.6s ease forwards;
+}
+.alert-choices {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 50px;        /* Резервируем место под кнопку, чтобы окно не прыгало */
+}
+
+.alert-choices button {
+    padding: 12px 25px;
+    font-size: 12px;
+    letter-spacing: 2px;
+    color: rgba(255, 200, 200, 0.9);
+    border: 1px solid rgba(255, 85, 85, 0.5);
+    background: transparent;
+    cursor: pointer;
+    transition: all 0.4s ease;
+    
+    opacity: 0;
+    animation: fadeInButton 0.8s ease forwards;
+    animation-delay: 0.4s;
+}
+
+.alert-choices button:hover {
+    border-color: rgba(255, 120, 120, 1);
+    background: rgba(255, 85, 85, 0.1);
+    color: white;
+}
+
+/* --- ВСПЛЫВАЮЩАЯ ПОДСКАЗКА К ПРЕДМЕТУ --- */
+.cabin-tooltip {
+    position: absolute;
+    max-width: 320px;
+    padding: 15px 20px;
+    
+    background: rgba(10, 15, 25, 0.85);
+    backdrop-filter: blur(6px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 300;
+    line-height: 1.5;
+    color: rgba(255, 255, 255, 0.95);
+    
+    pointer-events: none;
+    z-index: 50;
+    
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    
+    text-shadow: 0 0 8px rgba(0, 0, 0, 0.8);
+}
+
+.cabin-tooltip.visible {
+    opacity: 1;
+}
+/* === СЛОЙ ИНТЕРАКТИВНЫХ ЗОН КАЮТЫ === */
+#cabin-layer {
+    position: fixed;
+    inset: 0;
+    z-index: 15;
+    pointer-events: none;
+}
+
+/* === ИНТЕРАКТИВНАЯ ЗОНА (HOTSPOT) === */
+.cabin-hotspot {
+    position: absolute;
+    cursor: pointer;
+    pointer-events: auto;
+    z-index: 16;
+    border: 1px solid transparent;
+    transition: border-color 0.4s ease, box-shadow 0.4s ease;
+}
+
+.cabin-hotspot:hover {
+    border-color: rgba(255, 255, 255, 0.15);
+    box-shadow: 0 0 30px rgba(255, 255, 255, 0.08);
+}
+
+/* === ПОЗИЦИЯ ФИГУРКИ CURIOSITY === */
+/* Подстрой проценты под своё изображение! */
+.hotspot-curiosity {
+    top: 54%;
+    left: 40%;
+    width: 16%;
+    height: 20%;
+}
+
+/* === КНОПКА ИЛЛЮМИНАТОРА В КАЮТЕ === */
+.cabin-window-btn {
+    position: fixed !important;
+    right: 5% !important;
+    left: auto !important;
+    top: 35% !important;
+    width: 140px !important;
+    height: 80px !important;
+    padding: 10px !important;
+    font-size: 11px !important;
+    letter-spacing: 2px !important;
+    line-height: 1.4 !important;
+    margin: 0 !important;
+    z-index: 20;
+    pointer-events: auto;
+    opacity: 0;
+    transition: opacity 1.5s ease, border-color 0.5s ease, background 0.5s ease;
+    white-space: pre-line;
+}

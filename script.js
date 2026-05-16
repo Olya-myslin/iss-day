@@ -1563,4 +1563,433 @@ function startAntennaRepair() {
     setTimeout(() => {
         module.querySelector('.antenna-content').style.opacity = '1';
     }, 1500);
+    // Запускаем логику после появления макета
+setTimeout(() => {
+    initAntennaGame();
+}, 2500);
+}
+// === ЛОГИКА МИНИ-ИГРЫ: РЕМОНТ АНТЕННЫ ===
+
+// Глобальные переменные мини-игры
+let antennaState = {
+    cursorX: 60,
+    cursorY: 180,
+    nodes: [],          // массив всех узлов: {x, y, type}
+    keyHandler: null,    // ссылка на обработчик клавиш, чтобы его можно было снять
+    currentGoal: 1,
+    timeLeft: 60,          
+    timerInterval: null,
+    waves: [],             
+    waveInterval: null,
+    attempts: 3
+};
+
+// Шаг сетки (расстояние между узлами)
+const STEP_X = 120;
+const STEP_Y = 120;
+
+function initAntennaGame() {
+    // Полный старт игры (только один раз, при первом входе)
+    antennaState.attempts = 3;
+    antennaState.nodes = [];
+    
+    const nodeElements = document.querySelectorAll('#antenna-module .node');
+    
+    nodeElements.forEach(el => {
+        const x = parseFloat(el.getAttribute('cx'));
+        const y = parseFloat(el.getAttribute('cy'));
+        let type = 'safe';
+        
+        if (el.classList.contains('start'))     type = 'start';
+        if (el.classList.contains('goal'))      type = 'goal';
+        if (el.classList.contains('corrupted')) type = 'corrupted';
+        
+        const goalNumber = el.getAttribute('data-goal');
+        
+        antennaState.nodes.push({ 
+            x, y, type, element: el,
+            originalType: type,                       // === НОВОЕ ===
+            originalGoal: goalNumber ? parseInt(goalNumber) : null,  // === НОВОЕ ===
+            goalNumber: goalNumber ? parseInt(goalNumber) : null
+        });
+    });
+
+    // Запускаем первую попытку
+    resetAntennaAttempt();
+}
+
+function handleAntennaKey(e) {
+    let dx = 0, dy = 0;
+    
+    if (e.key === 'ArrowUp')    dy = -STEP_Y;
+    if (e.key === 'ArrowDown')  dy = STEP_Y;
+    if (e.key === 'ArrowLeft')  dx = -STEP_X;
+    if (e.key === 'ArrowRight') dx = STEP_X;
+    
+    if (dx === 0 && dy === 0) return;
+    
+    const targetX = antennaState.cursorX + dx;
+    const targetY = antennaState.cursorY + dy;
+    
+    const targetNode = antennaState.nodes.find(n => 
+        Math.abs(n.x - targetX) < 5 && Math.abs(n.y - targetY) < 5
+    );
+    
+    if (!targetNode) {
+        shakeCursor();
+        return;
+    }
+    
+    if (targetNode.type === 'corrupted') {
+        shakeCursor();
+        return;
+    }
+    
+    // === НОВОЕ: проверка цели ===
+    if (targetNode.type === 'goal' && targetNode.goalNumber) {
+        // Если это не текущая цель — нельзя
+        if (targetNode.goalNumber !== antennaState.currentGoal) {
+            shakeCursor();
+            return;
+        }
+    }
+    
+    // Двигаем курсор
+    moveCursor(targetNode.x, targetNode.y);
+    
+    // === НОВОЕ: если зашли на нужную цель — засчитываем ===
+    if (targetNode.type === 'goal' && targetNode.goalNumber === antennaState.currentGoal) {
+        completeGoal(targetNode);
+    }
+}
+
+function moveCursor(x, y) {
+    // === НОВОЕ: оставляем след на старой позиции ===
+    leaveTrail(antennaState.cursorX, antennaState.cursorY);
+    
+    antennaState.cursorX = x;
+    antennaState.cursorY = y;
+    
+    const cursor = document.querySelector('.player-cursor');
+    if (cursor) {
+        cursor.setAttribute('cx', x);
+        cursor.setAttribute('cy', y);
+    }
+    
+    // Проверяем волны
+    antennaState.waves.forEach(wave => {
+        const wavePos = wave.path[wave.currentIndex];
+        if (Math.abs(wavePos.x - x) < 5 && Math.abs(wavePos.y - y) < 5) {
+            antennaWaveHit();
+        }
+    });
+}
+
+function leaveTrail(x, y) {
+    const svg = document.querySelector('.antenna-grid');
+    if (!svg) return;
+    
+    const trail = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    trail.setAttribute('cx', x);
+    trail.setAttribute('cy', y);
+    trail.setAttribute('r', 5);
+    trail.classList.add('cursor-trail');
+    
+    svg.appendChild(trail);
+    
+    // Удаляем след через 1.2 секунды
+    setTimeout(() => trail.remove(), 1200);
+}
+function completeGoal(node) {
+    // Помечаем цель как пройденную
+    node.element.classList.add('completed');
+    
+    // Увеличиваем счётчик
+    antennaState.currentGoal++;
+    
+    // Обновляем шапку
+    const goalLabel = document.getElementById('current-goal');
+    if (goalLabel) {
+        if (antennaState.currentGoal > 3) {
+            // Все цели пройдены — победа
+            goalLabel.textContent = '3';
+            setTimeout(() => antennaVictory(), 600);
+        } else {
+            goalLabel.textContent = antennaState.currentGoal;
+        }
+    }
+    
+    // Меняем тип узла, чтобы по нему можно было ходить дальше как по обычному
+    node.type = 'safe';
+    node.goalNumber = null;
+}
+
+function antennaVictory() {
+    stopAntennaGame();
+    
+    // Временное сообщение — потом сделаем красивый переход
+    const module = document.getElementById('antenna-module');
+    if (!module) return;
+    
+    const message = document.createElement('div');
+    message.id = 'antenna-victory';
+    message.textContent = 'КОНТУР ВОССТАНОВЛЕН';
+    module.appendChild(message);
+
+    // Через 2.5 секунды переход к хорошей концовке
+    setTimeout(() => {
+        module.style.transition = 'opacity 1.5s ease';
+        module.style.opacity = '0';
+        setTimeout(() => {
+            module.remove();
+            // Заглушка — потом сделаем настоящую сцену хорошей концовки
+            renderScene('quiet_moment');
+        }, 1500);
+    }, 2500);
+}
+
+function shakeCursor() {
+    const cursor = document.querySelector('.player-cursor');
+    if (!cursor) return;
+    
+    cursor.classList.add('cursor-shake');
+    setTimeout(() => cursor.classList.remove('cursor-shake'), 300);
+}
+
+function stopAntennaGame() {
+    // Снимаем обработчик клавиш
+    if (antennaState.keyHandler) {
+        document.removeEventListener('keydown', antennaState.keyHandler);
+        antennaState.keyHandler = null;
+    }
+    
+    // === НОВОЕ: останавливаем таймер ===
+    stopAntennaTimer();
+}
+
+function startAntennaTimer() {
+    updateTimerDisplay();
+    
+    antennaState.timerInterval = setInterval(() => {
+        antennaState.timeLeft--;
+        updateTimerDisplay();
+        
+        // Последние 10 секунд — режим тревоги
+        if (antennaState.timeLeft <= 10) {
+            const timerEl = document.querySelector('.antenna-timer');
+            if (timerEl) timerEl.classList.add('warning');
+        }
+        
+        // Время вышло
+        if (antennaState.timeLeft <= 0) {
+            stopAntennaTimer();
+            antennaTimeout();
+        }
+    }, 1000);
+}
+
+function stopAntennaTimer() {
+    if (antennaState.timerInterval) {
+        clearInterval(antennaState.timerInterval);
+        antennaState.timerInterval = null;
+    }
+    
+    // Убираем красную пульсацию
+    const timerEl = document.querySelector('.antenna-timer');
+    if (timerEl) timerEl.classList.remove('warning');
+}
+
+function updateTimerDisplay() {
+    const timerSpan = document.getElementById('antenna-timer');
+    if (!timerSpan) return;
+    
+    const seconds = Math.max(0, antennaState.timeLeft);
+    const formatted = '00:' + String(seconds).padStart(2, '0');
+    timerSpan.textContent = formatted;
+}
+
+function antennaTimeout() {
+    antennaFail('ВРЕМЯ ИСТЕКЛО');
+}
+
+function antennaWaveHit() {
+    antennaFail('КУРСОР ПЕРЕХВАЧЕН');
+}
+
+function startAntennaWaves() {
+    // Описываем маршруты волн
+    antennaState.waves = [
+        {
+            element: document.querySelector('.wave-1'),
+            path: [
+                { x: 180, y: 60 },
+                { x: 300, y: 60 },
+                { x: 300, y: 180 },
+                { x: 180, y: 180 }
+            ],
+            currentIndex: 0
+        },
+        {
+            element: document.querySelector('.wave-2'),
+            path: [
+                { x: 660, y: 420 },
+                { x: 540, y: 420 },
+                { x: 540, y: 300 },
+                { x: 660, y: 300 }
+            ],
+            currentIndex: 0
+        }
+    ];
+    
+    // Каждую секунду двигаем все волны на следующий узел
+    antennaState.waveInterval = setInterval(() => {
+        antennaState.waves.forEach(wave => {
+            wave.currentIndex = (wave.currentIndex + 1) % wave.path.length;
+            const next = wave.path[wave.currentIndex];
+            
+            if (wave.element) {
+                wave.element.setAttribute('cx', next.x);
+                wave.element.setAttribute('cy', next.y);
+            }
+            
+            // Проверяем столкновение с курсором
+            checkWaveCollision(wave, next);
+        });
+    }, 1000);
+}
+
+function stopAntennaWaves() {
+    if (antennaState.waveInterval) {
+        clearInterval(antennaState.waveInterval);
+        antennaState.waveInterval = null;
+    }
+}
+
+function checkWaveCollision(wave, wavePos) {
+    // Если волна и курсор на одном узле — провал
+    if (Math.abs(wavePos.x - antennaState.cursorX) < 5 && 
+        Math.abs(wavePos.y - antennaState.cursorY) < 5) {
+        antennaWaveHit();
+    }
+}
+
+function antennaFail(reason) {
+    // Останавливаем игру (но не снимаем обработчик клавиш — пригодится для следующей попытки)
+    stopAntennaTimer();
+    stopAntennaWaves();
+    
+    // Уменьшаем счётчик попыток
+    antennaState.attempts--;
+    updateAttemptsDisplay();
+    
+    // Красная вспышка
+    flashRedScreen();
+    
+    if (antennaState.attempts <= 0) {
+        // Окончательный проигрыш
+        setTimeout(() => antennaFinalLoss(), 800);
+    } else {
+        // Показываем короткое сообщение и перезапускаем
+        showAttemptFailMessage(reason);
+        setTimeout(() => resetAntennaAttempt(), 1800);
+    }
+}
+
+function resetAntennaAttempt() {
+    // Сбрасываем цели
+    antennaState.currentGoal = 1;
+    antennaState.timeLeft = 60;
+    
+    // Возвращаем тип узлов к исходному (золотые цели опять золотые)
+    antennaState.nodes.forEach(n => {
+        n.type = n.originalType;
+        n.goalNumber = n.originalGoal;
+        n.element.classList.remove('completed');
+    });
+    
+    // Возвращаем курсор на старт
+    const start = antennaState.nodes.find(n => n.type === 'start');
+    antennaState.cursorX = start.x;
+    antennaState.cursorY = start.y;
+    const cursor = document.querySelector('.player-cursor');
+    if (cursor) {
+        cursor.setAttribute('cx', start.x);
+        cursor.setAttribute('cy', start.y);
+    }
+    
+    // Обновляем счётчик цели в шапке
+    const goalLabel = document.getElementById('current-goal');
+    if (goalLabel) goalLabel.textContent = '1';
+    
+    // Снимаем красную пульсацию таймера
+    const timerEl = document.querySelector('.antenna-timer');
+    if (timerEl) timerEl.classList.remove('warning');
+    updateTimerDisplay();
+    
+    // Вешаем обработчик клавиш (если не висит)
+    if (!antennaState.keyHandler) {
+        antennaState.keyHandler = (e) => handleAntennaKey(e);
+        document.addEventListener('keydown', antennaState.keyHandler);
+    }
+    
+    // Запускаем таймер и волны
+    startAntennaTimer();
+    startAntennaWaves();
+}
+function updateAttemptsDisplay() {
+    const dots = document.querySelectorAll('.attempt-dot');
+    dots.forEach((dot, index) => {
+        if (index < antennaState.attempts) {
+            dot.classList.add('active');
+        } else {
+            dot.classList.remove('active');
+        }
+    });
+}
+
+function flashRedScreen() {
+    const flash = document.createElement('div');
+    flash.id = 'red-flash';
+    document.body.appendChild(flash);
+    
+    setTimeout(() => flash.remove(), 600);
+}
+
+function showAttemptFailMessage(text) {
+    const module = document.getElementById('antenna-module');
+    if (!module) return;
+    
+    const message = document.createElement('div');
+    message.className = 'antenna-fail-temp';
+    message.textContent = text;
+    module.appendChild(message);
+    
+    setTimeout(() => message.remove(), 1700);
+}
+
+function antennaFinalLoss() {
+    stopAntennaGame();
+    
+    // Все узлы краснеют
+    document.querySelectorAll('#antenna-module .node').forEach(el => {
+        el.classList.add('burned');
+    });
+    
+    const module = document.getElementById('antenna-module');
+    if (!module) return;
+    
+    const message = document.createElement('div');
+    message.id = 'antenna-fail';
+    message.textContent = 'КОНТУР СГОРЕЛ';
+    module.appendChild(message);
+    
+    // Через 3 секунды переход к плохой концовке
+    setTimeout(() => {
+        module.style.transition = 'opacity 1.5s ease';
+        module.style.opacity = '0';
+        setTimeout(() => {
+            module.remove();
+            renderScene('quiet_moment');
+        }, 1500);
+    }, 3000);
 }

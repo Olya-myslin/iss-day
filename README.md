@@ -30,5 +30,5 @@ https://olya-myslin.github.io/iss-day/
 
 ## Скриншоты
 <img width="600" src="https://github.com/user-attachments/assets/e4d8f9c1-1850-412f-b9d8-10e81d3902a1" />
-<img width="600" src="https://github.com/user-attachments/assets/c1716449-1834-4c96-ab50-4ea59d3bc40b" />
+<img width="600" src="https://github.com/user-attachments/assets/aef05ec8-3881-40ad-975b-66b57b6e37f0" />
 <img width="600" src="https://github.com/user-attachments/assets/d470adee-408e-4e47-8432-227688bf8ac0" />

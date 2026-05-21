@@ -59,13 +59,6 @@ function startTypingSound() {
     typingSound.play().catch(() => {});
 }
 
-function stopTypingSound() {
-    if (typingSound) {
-        typingSound.pause();
-        typingSound.currentTime = 0;
-        typingSound = null;
-    }
-}
 
 function typeWriter(text, element, speed, callback) {
     let i = 0;
@@ -193,7 +186,7 @@ const story = {
 ]
     },
     'breakfast_early': {
-        text: "Ты пришел вовремя. У тебя есть возможноть<br>выбрать что ты хочешь на завтрак.",
+        text: "Ты пришел вовремя. У тебя есть возможность<br>выбрать что ты хочешь на завтрак.",
         background: 'url("images/fon.png")',
         floatingItems: ['images/food1.png', 'images/food2.png', 'images/food3.png'],
         options: [
@@ -320,14 +313,7 @@ const story = {
     options: [],
     isCabin: true
 },
-'cabin_window': {
-    text: "За стеклом — бесконечная чернота и тонкая голубая линия атмосферы.<br>Земля медленно поворачивается внизу.<br>Отсюда не видно границ. Только океаны, облака и свет.",
-    background: 'url("images/wind.png")',
-    showAlarm: false,
-    options: [
-        { text: "Вернуться в каюту", nextScene: 'cabin' }
-    ]
-},
+
 'cabin_window': {
     text: "За стеклом — бесконечная чернота и тонкая голубая линия атмосферы.<br>Земля медленно поворачивается внизу.<br>Отсюда не видно границ. Только океаны, облака и свет.",
     background: 'url("images/wind.png")',   // ← исправил wind.png на window.png
@@ -355,7 +341,6 @@ const story = {
         { text: "Открыть внешний люк", nextScene: 'eva_exit' }
     ]
 },
-
 'eva_exit': {
     text: "Люк открывается.<br>Тишина.<br>Абсолютная, оглушающая тишина.<br>Под тобой — Земля. Над тобой — всё остальное.",
     background: 'url("images/spacesuit3.png")', // Фон с видом из скафандра
@@ -403,6 +388,114 @@ const story = {
     ]
 },
 
+'eva_traverse': {
+    text: "Пальцы в перчатках находят поручень.<br>Ты медленно тянешь себя вдоль обшивки станции.<br>Каждое движение даётся осторожно — не из-за тяжести, а из-за понимания, где именно ты находишься.",
+    background: 'url("images/222.png")',
+    showAlarm: false,
+    options: [
+        { text: "Продолжить путь", nextScene: 'eva_antenna' }
+    ]
+},
+
+'eva_antenna': {
+    text: "Ты добираешься до антенны S-диапазона.<br>Кабель действительно отсоединился и теперь болтается рядом с корпусом.<br>Следов удара не видно.<br>Возможно, сработала усталость материала. Возможно — резкий перепад температур. Возможно, что-то ещё, чего ты пока не видишь.",
+    background: 'url("images/444.png")',
+    showAlarm: false,
+    options: [
+        { text: "Осмотреться", nextScene: 'eva_look_down' },
+        { text: "Подойти ближе к антенне", nextScene: 'eva_cable_close' }
+    ]
+},
+
+'eva_look_down': {
+    text: "Ты на мгновение замираешь и смотришь вниз.<br>Под тобой — Земля: облака, океаны, тонкая синяя кромка атмосферы.<br>Отсюда всё кажется удивительно хрупким.<br>Ни границ, ни шума, ни споров — только свет, тень и медленное вращение дома, который так далеко и так близко одновременно.",
+    background: 'url("images/333.png")',
+    showAlarm: false,
+    options: [
+        { text: "Подойти ближе к антенне", nextScene: 'eva_cable_close' }
+    ]
+},
+
+'eva_cable_close': {
+    text: "Ты фиксируешься у корпуса и берёшь оторвавшийся провод.<br>На разъёме видны жилы и тонкие дорожки, а под панелью — микросхемы антенны.<br>Повреждение локальное. Значит, шанс восстановить контур есть.<br>Теперь всё зависит от точности твоих действий.",
+    background: 'url("images/555.png")',
+    showAlarm: false,
+    options: [
+        { text: "Приступить к ремонту", nextScene: 'antenna_repair_start' }
+    ]
+},
+
+'antenna_repair_start': {
+    text: "",
+    background: 'none',
+    showAlarm: false,
+    isAntennaRepair: true,
+    options: []
+},
+// === ВЕТКА: ПОДСТРАХОВКА У АЛЕКСА (readiness < 8) ===
+
+'assist_prep': {
+    text: "Шлюзовой отсек «Квест».<br>Три скафандра EMU висят в креплениях — белые, массивные, как пустые оболочки.<br>Твой остаётся висеть справа. Ты остаёшься внутри.<br>Алекс — твои руки и глаза снаружи.",
+    background: 'url("images/suits.jpeg")',
+    showAlarm: false,
+    options: [
+        { text: "Помочь Алексу надеть скафандр", nextScene: 'assist_gloves' }
+    ]
+},
+
+'assist_gloves': {
+    text: "Ты фиксируешь запястье перчатки, пока Алекс втягивает пальцы.<br>Щелчок замка — и рука защищена от вакуума.<br>Он кивает через визор. Не слышно, но понятно.<br>Время выхода приближается.",
+    background: 'url("images/assist_glove.png")',
+    showAlarm: false,
+    options: [
+        { text: "Перейти к терминалу", nextScene: 'assist_monitor' }
+    ]
+},
+
+'assist_monitor': {
+    text: "Ты у терминала координации.<br>На экране — его шлем-камера: белая обшивка, чёрный космос, желтые поручни.<br>Ты видишь то, что видит он.<br>Единственная связь — голос в наушниках и эта пульсирующая картинка.",
+    background: 'url("images/eva_monitor.png")',
+    showAlarm: false,
+    options: [
+        { text: "Начать поддержку связи", nextScene: 'assist_support_start' }
+    ]
+},
+
+'assist_support_start': {
+    text: "",
+    background: 'url("images/eva_monitor.png")',
+    showAlarm: false,
+    isAssistSupport: true,
+    options: []
+},
+// === КОНЦОВКИ ВЕТКИ ПОДДЕРЖКИ ===
+
+'assist_result_good': {
+    text: "Алекс возвращается в шлюз через сорок минут.<br>«Спасибо, командир. Ты вёл меня как по нотам.»<br>Антенна работает. Связь с Землёй полная.<br>Иногда лучший выход в космос — это тот, который ты совершил, оставаясь внутри.",
+    background: 'url("images/eva_monitor.png")',
+    showAlarm: false,
+    options: [
+        { text: "Продолжить день", nextScene: 'quiet_moment' }
+    ]
+},
+
+'assist_result_normal': {
+    text: "Алекс возвращается уставшим, но целым.<br>«Было непросто. Но мы справились.»<br>Антенна работает. Не идеально, но достаточно.<br>Связь восстановлена.",
+    background: 'url("images/eva_monitor.png")',
+    showAlarm: false,
+    options: [
+        { text: "Продолжить день", nextScene: 'quiet_moment' }
+    ]
+},
+
+'assist_result_bad': {
+    text: "Алекс возвращается молча.<br>В наушниках голос ЦУПа: «Дальше будем работать через старшего оператора.»<br>Антенна починена. Алекс цел.<br>Но этот выход он сделал почти один.",
+    background: 'url("images/eva_monitor.png")',
+    showAlarm: false,
+    options: [
+        { text: "Продолжить день", nextScene: 'quiet_moment' }
+    ]
+},
 'quiet_moment': {
     text: "Ты возвращаешься к терминалу.<br>День идёт своим чередом.<br><br>(Эта сцена — заглушка, дальше будет продолжение сюжета)",
     background: 'url("images/control.png")',
@@ -419,6 +512,10 @@ function renderScene(sceneKey) {
     // ЗАЩИТА ОТ ДВОЙНЫХ КЛИКОВ
     if (isTransitioning) return;
     isTransitioning = true;
+
+ const transitionGuard = setTimeout(() => {
+        isTransitioning = false;
+    }, 8000);
 
     // ШАГ 1: ПОЛНЫЙ BLACK FADE
     bg.style.opacity = '0';
@@ -448,13 +545,23 @@ function renderScene(sceneKey) {
         } else if (!scene.isEVA) {
             bg.style.backgroundImage = scene.background;
         }
-
-        // === EVA: перехватываем до проявления фона ===
-        if (scene.isEVA) {
-            isTransitioning = false;
-            startEVAMode();
-            return;
-        }
+// === EVA: приглушаем музыку и включаем дыхание ===
+if (sceneKey === 'eva_exit' && !breathingAudio) {
+    fadeOutMainMusic();
+    startBreathingAudio();
+}
+        // === ЗАПУСК МИНИ-ИГРЫ РЕМОНТА АНТЕННЫ ===
+if (scene.isAntennaRepair) {
+    isTransitioning = false;
+    startAntennaRepair();
+    return;
+}
+// === ЗАПУСК МИНИ-ИГРЫ ПОДДЕРЖКИ СВЯЗИ ===
+if (scene.isAssistSupport) {
+    isTransitioning = false;
+    startAssistSupport();
+    return;
+}
 
         // ШАГ 3: ПРОЯВЛЕНИЕ
         setTimeout(() => {
@@ -734,13 +841,13 @@ function startFastCalibration(module, log) {
         }
 
         if (stableTime > 180) {
-    const success = document.createElement("div");
-    success.innerHTML = "> БЫСТРАЯ ПРОВЕРКА УСПЕШНА";
-    log.appendChild(success);
+            const success = document.createElement("div");
+            success.innerHTML = "> БЫСТРАЯ ПРОВЕРКА УСПЕШНА";
+            log.appendChild(success);
 
-    finishCalibration(module);
-    return;
-}
+            finishCalibration(module);
+            return;
+        }
 
         requestAnimationFrame(animate);
     }
@@ -788,23 +895,23 @@ function startFullCalibration(module, log) {
             bar.style.opacity = "1";
             bar.style.transform = "translateY(0)";
         });
-channels.push({
-    position: 50,
-    velocity: 0.35 + i * 0.15,     // мягче
-    noise: 0.015 + i * 0.01,       // меньше дёрганья
-    controlFactor: 0.04 - i * 0.008,
 
-    zoneStart: zoneStart,
-    zoneEnd: zoneEnd,
+        channels.push({
+            position: 50,
+            velocity: 0.35 + i * 0.15,
+            noise: 0.015 + i * 0.01,
+            controlFactor: 0.04 - i * 0.008,
 
-    stableTime: 0,
-    stable: false,
+            zoneStart: zoneStart,
+            zoneEnd: zoneEnd,
 
-    marker: marker,
-    zone: zone
-});
-  
-}
+            stableTime: 0,
+            stable: false,
+
+            marker: marker,
+            zone: zone
+        });
+    }
 
     function animate() {
 
@@ -842,31 +949,31 @@ channels.push({
 
             if (ch.stableTime > 180 && !ch.stable) {
 
-    ch.stable = true;
+                ch.stable = true;
 
-    ch.zone.style.background = "white";
-    ch.marker.style.background = "white";
+                ch.zone.style.background = "white";
+                ch.marker.style.background = "white";
 
-    const channelIndex = channels.indexOf(ch);
+                const channelIndex = channels.indexOf(ch);
 
-    const logLine = document.createElement("div");
-    logLine.innerHTML = `> КАНАЛ ${String.fromCharCode(65 + channelIndex)} СТАБИЛИЗИРОВАН`;
-    log.appendChild(logLine);
-}
+                const logLine = document.createElement("div");
+                logLine.innerHTML = `> КАНАЛ ${String.fromCharCode(65 + channelIndex)} СТАБИЛИЗИРОВАН`;
+                log.appendChild(logLine);
+            }
 
             if (!ch.stable) allStable = false;
         });
 
         if (allStable && !transitioning) {
-    transitioning = true;
+            transitioning = true;
 
-    const finalText = document.createElement("div");
-    finalText.innerHTML = "> ВСЕ ЧАСТОТЫ СИНХРОНИЗИРОВАНЫ";
-    log.appendChild(finalText);
+            const finalText = document.createElement("div");
+            finalText.innerHTML = "> ВСЕ ЧАСТОТЫ СИНХРОНИЗИРОВАНЫ";
+            log.appendChild(finalText);
 
-    finishCalibration(module);
-    return;
-}
+            finishCalibration(module);
+            return;
+        }
 
         requestAnimationFrame(animate);
     }
@@ -882,15 +989,15 @@ function finishCalibration(module) {
     module.querySelector(".calibration-content").appendChild(finishBtn);
 
     finishBtn.onclick = () => {
-    module.remove();
-    bg.style.filter = "brightness(1)";
-    
-    // Возвращаем панель
-    showScenePanel();
-    gameText.style.opacity = "1";
-    choices.style.opacity = "1";
-    gameText.innerHTML = "";
-    choices.innerHTML = "";
+        module.remove();
+        bg.style.filter = "brightness(1)";
+        
+        // Возвращаем панель
+        showScenePanel();
+        gameText.style.opacity = "1";
+        choices.style.opacity = "1";
+        gameText.innerHTML = "";
+        choices.innerHTML = "";
 
         // Печатаем текст с эффектом typeWriter
         typeWriter("Калибровка завершена.<br>Отчёт ушёл на Землю.", gameText, 40, () => {
@@ -901,6 +1008,30 @@ function finishCalibration(module) {
         });
     };
 }
+function createHUD() {
+    const hud = document.createElement('div');
+    hud.id = 'hud-status';
+    hud.innerHTML = `
+        <svg class="hud-svg" viewBox="0 0 220 60">
+            <rect class="hud-rect" x="0" y="0" width="220" height="60"></rect>
+        </svg>
+        <div class="hud-content">
+            <div id="hud-readiness">READINESS: 00</div>
+            <div id="hud-state">STATUS: NORMAL</div>
+        </div>
+    `;
+    document.body.appendChild(hud);
+
+    setTimeout(() => {
+        hud.style.opacity = '1';
+        const rect = hud.querySelector('.hud-rect');
+        rect.style.strokeDashoffset = '0';
+        setTimeout(() => {
+            hud.classList.add('visible');
+        }, 1000);
+    }, 500);
+}
+
 // 8. СТАРТ ИГРЫ
 startBtn.addEventListener('click', () => {
     playClickSound();
@@ -917,31 +1048,7 @@ startBtn.addEventListener('click', () => {
     starLayer.style.opacity = '0';
     bg.style.opacity = '0';
     // Функция создания HUD
-function createHUD() {
-    const hud = document.createElement('div');
-    hud.id = 'hud-status';
-    hud.innerHTML = `
-        <svg class="hud-svg" viewBox="0 0 220 60">
-            <rect class="hud-rect" x="0" y="0" width="220" height="60"></rect>
-        </svg>
-        <div class="hud-content">
-            <div id="hud-readiness">READINESS: 00</div>
-            <div id="hud-state">STATUS: NORMAL</div>
-        </div>
-    `;
-    document.body.appendChild(hud);
 
-    // Анимация появления (как в калибровке)
-    setTimeout(() => {
-        hud.style.opacity = '1';
-        const rect = hud.querySelector('.hud-rect');
-        const content = hud.querySelector('.hud-content');
-        rect.style.strokeDashoffset = '0'; // Рисуем рамку
-        setTimeout(() => {
-         hud.classList.add('visible')
-        }, 1000);
-    }, 500);
-}
 
     setTimeout(() => {
         // --- ПОДГОТОВКА ВТОРОГО СЛАЙДА (В ТЕМНОТЕ) ---
@@ -1198,8 +1305,8 @@ function showAlertMessage() {
     nextScene = 'eva_suits';
 } else {
     finalText = "— Командир, по данным за смену видим<br>повышенный пульс и накопленную усталость.<br>Риск слишком высокий. На внешнюю обшивку идёт Алекс.<br>Вы координируете его изнутри.";
-    finalBtn = "ПРИНЯТО";
-    nextScene = 'eva_suits';           // теперь обе ветки идут на подготовку
+    finalBtn = "ПРИНЯТЬ К ПОДСТРАХОВКЕ";
+    nextScene = 'assist_prep';
 }
 
         typeWriter(finalText, textBox, 25, () => {
@@ -1298,615 +1405,970 @@ function startCabinMode() {
 
 // === РЕЖИМ ВЫХОДА В КОСМОС ===
 let breathingAudio = null;
+function fadeOutMainMusic() {
+    let fadeOut = setInterval(() => {
+        if (music.volume > 0.02) {
+            music.volume -= 0.02;
+        } else {
+            music.volume = 0;
+            music.pause();
+            clearInterval(fadeOut);
+        }
+    }, 100);
+}
 
+// === МИНИ-ИГРА: ПОДДЕРЖКА СВЯЗИ ===
 
+let supportState = {
+    correctAnswers: 0,
+    currentEvent: 0,
+    timerInterval: null,
+    timeLeft: 0,
+    answered: false
+};
 
-// === МИНИ-ИГРА: РЕМОНТ АНТЕННЫ ===
+const supportEvents = [
+    {
+        param: 'pulse',
+        label: 'ПУЛЬС',
+        alert: '⚠ ПУЛЬС РАСТЁТ',
+        alexBefore: '«Кажется, я слишком разогнался... сердце колотится.»',
+        options: [
+            { text: "Снизить темп работы", correct: true },
+            { text: "Сделать паузу 30 секунд", correct: false },
+            { text: "Проверить крепление шлема", correct: false }
+        ],
+        alexAfterCorrect: '«Принял. Замедляюсь... да, лучше. Спасибо.»',
+        alexAfterWrong: '«Не то... сам справлюсь, дай минуту.»'
+    },
+    {
+        param: 'oxygen',
+        label: 'КИСЛОРОД',
+        alert: '⚠ ПАДАЕТ ДАВЛЕНИЕ В ПЕРЧАТКЕ',
+        alexBefore: '«Слышу шипение в перчатке. Не пойму откуда.»',
+        options: [
+            { text: "Снизить расход кислорода", correct: false },
+            { text: "Проверить крепление перчатки", correct: true },
+            { text: "Включить аварийный режим", correct: false }
+        ],
+        alexAfterCorrect: '«Точно, замок недожат. Дотянул. Давление выравнивается.»',
+        alexAfterWrong: '«Не помогает... давление падает. Жду подсказку.»'
+    },
+    {
+        param: 'temperature',
+        label: 'ТЕМПЕРАТУРА',
+        alert: '⚠ ПЕРЕГРЕВ СКАФАНДРА',
+        alexBefore: '«Жарко становится. Похоже, перегрев системы охлаждения.»',
+        options: [
+            { text: "Снизить темп работы", correct: false },
+            { text: "Сделать паузу 30 секунд", correct: false },
+            { text: "Включить дополнительное охлаждение", correct: true }
+        ],
+        alexAfterCorrect: '«Поток пошёл. Уже легче. Продолжаю.»',
+        alexAfterWrong: '«Терплю... постараюсь сам.»'
+    }
+];
+// Печать реплики Алекса (без звука печати, чтобы не сбивать)
+function typeAlexLine(element, text, speed) {
+    let i = 0;
+    element.innerHTML = '';
+
+    function type() {
+        if (i < text.length) {
+            if (text.substring(i, i + 4) === '<br>') {
+                element.innerHTML += '<br>';
+                i += 4;
+            } else {
+                element.innerHTML += text.charAt(i);
+                i++;
+            }
+            setTimeout(type, speed);
+        }
+    }
+    type();
+}
+function startAssistSupport() {
+    // Скрываем основную панель
+    hideScenePanel();
+
+    // Создаём модуль
+    const module = document.createElement('div');
+    module.id = 'support-module';
+    module.innerHTML = `
+        <svg class="support-frame-svg" viewBox="0 0 1000 600" preserveAspectRatio="none">
+            <rect class="support-frame-rect" x="1" y="1" width="998" height="598"></rect>
+        </svg>
+
+        <div class="support-content">
+            <div class="support-header">
+                <div class="support-title">ПОДДЕРЖКА СВЯЗИ — ALEX / EVA-1</div>
+                <div class="support-event-counter">СОБЫТИЕ <span id="support-event-num">1</span> / 3</div>
+            </div>
+
+            <div class="support-params">
+                <div class="support-param">
+                    <div class="support-param-label">ПУЛЬС</div>
+                    <div class="support-param-bar"><div class="support-param-fill" id="param-pulse"></div></div>
+                    <div class="support-param-value" id="value-pulse">75</div>
+                </div>
+                <div class="support-param">
+                    <div class="support-param-label">КИСЛОРОД</div>
+                    <div class="support-param-bar"><div class="support-param-fill" id="param-oxygen"></div></div>
+                    <div class="support-param-value" id="value-oxygen">97%</div>
+                </div>
+                <div class="support-param">
+                    <div class="support-param-label">ТЕМПЕРАТУРА</div>
+                    <div class="support-param-bar"><div class="support-param-fill" id="param-temperature"></div></div>
+                    <div class="support-param-value" id="value-temperature">норма</div>
+                </div>
+            </div>
+
+            <div class="support-alex-line" id="support-alex"></div>
+            <div class="support-alert" id="support-alert"></div>
+            <div class="support-timer-bar" id="support-timer-bar">
+                <div class="support-timer-fill" id="support-timer-fill"></div>
+            </div>
+
+            <div class="support-choices" id="support-choices"></div>
+        </div>
+    `;
+
+    document.body.appendChild(module);
+// Анимация рамки + плавное появление фона
+setTimeout(() => {
+    const rect = module.querySelector('.support-frame-rect');
+    rect.style.strokeDashoffset = '0';
+    rect.classList.add('filled');
+}, 300);
+
+    // Сброс состояния
+supportState.correctAnswers = 0;
+supportState.currentEvent = 0;
+
+// Поочерёдное плавное появление элементов
+const elementsToShow = [
+    '.support-header',
+    '.support-params',
+    '.support-alex-line',
+    '.support-alert',
+    '.support-timer-bar',
+    '.support-choices'
+];
+
+elementsToShow.forEach((selector, index) => {
+    setTimeout(() => {
+        const el = module.querySelector(selector);
+        if (el) el.classList.add('visible-element');
+    }, 1200 + index * 350);
+});
+
+// Запуск первого события (после появления всех элементов)
+setTimeout(() => {
+    runSupportEvent();
+}, 1200 + elementsToShow.length * 350 + 400);
+}
+
+function runSupportEvent() {
+    const event = supportEvents[supportState.currentEvent];
+    if (!event) {
+        finishSupportGame();
+        return;
+    }
+
+    supportState.answered = false;
+
+    // Обновляем счётчик
+    document.getElementById('support-event-num').textContent = supportState.currentEvent + 1;
+
+ // Реплика Алекса ДО события (печатается)
+const alexEl = document.getElementById('support-alex');
+alexEl.innerHTML = '';
+alexEl.classList.add('visible');
+typeAlexLine(alexEl, event.alexBefore, 30);
+
+    // Звук уведомления
+    const sound = new Audio('audio/notification.mp3');
+    sound.volume = 0.4;
+    sound.play().catch(() => {});
+
+    // Через 2.8 сек — показываем параметр в красном
+    setTimeout(() => {
+        const paramFill = document.getElementById('param-' + event.param);
+        const paramValue = document.getElementById('value-' + event.param);
+
+        paramFill.classList.add('critical');
+
+        if (event.param === 'pulse') {
+            paramFill.style.width = '95%';
+            paramValue.textContent = '128';
+        } else if (event.param === 'oxygen') {
+            paramFill.style.width = '40%';
+            paramValue.textContent = '62%';
+        } else if (event.param === 'temperature') {
+            paramFill.style.width = '90%';
+            paramValue.textContent = 'высокая';
+        }
+
+        // Тревожное сообщение
+        const alertEl = document.getElementById('support-alert');
+        alertEl.textContent = event.alert;
+        alertEl.classList.add('visible');
+
+        // Показываем кнопки
+        showSupportChoices(event);
+
+        // Запускаем таймер
+        startSupportTimer(event);
+    }, 2800);
+}
+
+function showSupportChoices(event) {
+    const box = document.getElementById('support-choices');
+    box.innerHTML = '';
+
+    event.options.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.textContent = opt.text;
+        btn.onclick = () => {
+            if (supportState.answered) return;
+            playClickSound();
+            handleSupportAnswer(opt.correct, btn, event);
+        };
+        box.appendChild(btn);
+    });
+}
+
+function startSupportTimer(event) {
+    supportState.timeLeft = 5000; // 5 секунд
+    const fill = document.getElementById('support-timer-fill');
+    const bar = document.getElementById('support-timer-bar');
+    bar.classList.add('visible');
+    fill.style.width = '100%';
+
+    const startTime = Date.now();
+
+    supportState.timerInterval = setInterval(() => {
+        const elapsed = Date.now() - startTime;
+        const remaining = Math.max(0, supportState.timeLeft - elapsed);
+        const percent = (remaining / supportState.timeLeft) * 100;
+        fill.style.width = percent + '%';
+
+        if (percent < 30) {
+            fill.classList.add('danger');
+        }
+
+        if (remaining <= 0) {
+            clearInterval(supportState.timerInterval);
+            if (!supportState.answered) {
+                handleSupportAnswer(false, null, event); // не успел = неправильно
+            }
+        }
+    }, 50);
+}
+
+function handleSupportAnswer(isCorrect, btn, event) {
+    supportState.answered = true;
+    clearInterval(supportState.timerInterval);
+
+    // Блокируем все кнопки
+    document.querySelectorAll('#support-choices button').forEach(b => b.disabled = true);
+
+    // Подсвечиваем нажатую
+    if (btn) {
+        btn.classList.add(isCorrect ? 'correct' : 'wrong');
+    }
+
+    // Показываем правильную, если игрок ошибся
+    if (!isCorrect) {
+        document.querySelectorAll('#support-choices button').forEach(b => {
+            const opt = event.options.find(o => o.text === b.textContent);
+            if (opt && opt.correct) b.classList.add('correct');
+        });
+    }
+
+  // Реплика Алекса ПОСЛЕ (печатается)
+const alexEl = document.getElementById('support-alex');
+alexEl.classList.remove('visible');
+
+setTimeout(() => {
+    alexEl.innerHTML = '';
+    alexEl.classList.add('visible');
+    const lineAfter = isCorrect ? event.alexAfterCorrect : event.alexAfterWrong;
+    typeAlexLine(alexEl, lineAfter, 30);
+}, 400);
+
+    // Если правильно — возвращаем параметр в норму
+    if (isCorrect) {
+        supportState.correctAnswers++;
+        setTimeout(() => {
+            const paramFill = document.getElementById('param-' + event.param);
+            const paramValue = document.getElementById('value-' + event.param);
+            paramFill.classList.remove('critical');
+
+            if (event.param === 'pulse') {
+                paramFill.style.width = '78%';
+                paramValue.textContent = '88';
+            } else if (event.param === 'oxygen') {
+                paramFill.style.width = '85%';
+                paramValue.textContent = '92%';
+            } else if (event.param === 'temperature') {
+                paramFill.style.width = '70%';
+                paramValue.textContent = 'норма';
+            }
+        }, 600);
+    }
+
+    // Прячем алерт и таймер
+    document.getElementById('support-alert').classList.remove('visible');
+    document.getElementById('support-timer-bar').classList.remove('visible');
+
+    // Переход к следующему событию через 3.5 сек
+    setTimeout(() => {
+        supportState.currentEvent++;
+        runSupportEvent();
+    }, 3500);
+}
+
+function finishSupportGame() {
+    const module = document.getElementById('support-module');
+    if (!module) return;
+
+    // Определяем результат
+    let resultText, nextScene;
+    const score = supportState.correctAnswers;
+
+    if (score === 3) {
+        resultText = 'РАБОТА ЗАВЕРШЕНА.<br>АНТЕННА ВОССТАНОВЛЕНА.<br>АЛЕКС ВОЗВРАЩАЕТСЯ.';
+        nextScene = 'assist_result_good';
+    } else if (score === 2) {
+        resultText = 'РЕМОНТ ВЫПОЛНЕН.<br>АЛЕКС СПРАВИЛСЯ.';
+        nextScene = 'assist_result_normal';
+    } else {
+        resultText = 'АНТЕННА ВОССТАНОВЛЕНА.<br>АЛЕКС ВЫШЕЛ САМ.';
+        nextScene = 'assist_result_bad';
+    }
+
+    // Показываем финальное сообщение
+    const finalMsg = document.createElement('div');
+    finalMsg.classList.add('support-final');
+    finalMsg.innerHTML = resultText;
+    module.appendChild(finalMsg);
+
+    // Через 3.5 сек убираем модуль и переходим к концовке
+    setTimeout(() => {
+        module.style.transition = 'opacity 1.5s ease';
+        module.style.opacity = '0';
+        setTimeout(() => {
+            module.remove();
+            renderScene(nextScene);
+        }, 1500);
+    }, 3500);
+}
+// === МИНИ-ИГРА: РЕМОНТ АНТЕННЫ (Prey-style) ===
+
+let antennaGame = {
+    cursorX: 50,
+    cursorY: 250,
+    velocityX: 0,
+    velocityY: 0,
+    speed: 4,
+    keys: { up: false, down: false, left: false, right: false },
+    stunned: false,
+    attempts: 3,
+    timeLeft: 40,
+    timerInterval: null,
+    gameLoopId: null,
+    keyHandler: null,
+    keyUpHandler: null,
+    obstacles: [],
+    dangers: [],
+    targetZones: [],
+    currentTarget: 0,
+    fieldWidth: 900,
+    fieldHeight: 480,
+    inTargetZone: false,
+    requiredKey: null,
+    keyTimerInterval: null,
+    keyTimeLeft: 0
+};
+
+const ANTENNA_CONFIG = {
+    obstacles: [
+        // === ВЕРХНИЙ КРАЙ — препятствия вплотную к верху ===
+        { x: 0,   y: 0,   w: 180, h: 50 },   // верх-левый угол
+        { x: 250, y: 0,   w: 140, h: 70 },   // верх-центр-лево
+        { x: 460, y: 0,   w: 100, h: 90 },   // верх-центр
+        { x: 640, y: 0,   w: 120, h: 60 },   // верх-центр-право
+        { x: 820, y: 0,   w: 80,  h: 100 },  // верх-правый угол
+
+        // === ЛЕВЫЙ КРАЙ ===
+        { x: 0,   y: 130, w: 90,  h: 120 },  // лево-середина
+        { x: 0,   y: 330, w: 110, h: 80 },   // лево-низ
+
+        // === ПРАВЫЙ КРАЙ ===
+        { x: 820, y: 160, w: 80,  h: 100 },  // право-середина-верх
+        { x: 800, y: 320, w: 100, h: 90 },   // право-середина-низ
+
+        // === НИЖНИЙ КРАЙ ===
+        { x: 0,   y: 440, w: 150, h: 40 },   // низ-лево
+        { x: 200, y: 430, w: 130, h: 50 },   // низ-центр-лево
+        { x: 400, y: 440, w: 180, h: 40 },   // низ-центр
+        { x: 640, y: 430, w: 120, h: 50 },   // низ-центр-право
+
+        // === ЦЕНТРАЛЬНАЯ ЗОНА — лабиринт ===
+        { x: 180, y: 130, w: 50,  h: 130 },  // вертикальный
+        { x: 290, y: 170, w: 130, h: 50 },   // горизонтальный
+        { x: 480, y: 180, w: 60,  h: 140 },  // вертикальный высокий
+        { x: 600, y: 130, w: 50,  h: 110 },  // вертикальный
+        { x: 690, y: 200, w: 100, h: 50 },   // горизонтальный
+
+        { x: 150, y: 280, w: 120, h: 50 },   // средний-низ
+        { x: 320, y: 310, w: 60,  h: 100 },  // вертикальный
+        { x: 420, y: 340, w: 110, h: 50 },   // горизонтальный
+        { x: 580, y: 290, w: 90,  h: 60 },   // блок
+        { x: 700, y: 320, w: 70,  h: 80 }    // блок
+    ],
+    dangers: [
+        { x: 120, y: 80,  w: 55,  h: 55 },   // верх-лево
+        { x: 380, y: 90,  w: 60,  h: 65 },   // верх-центр
+        { x: 560, y: 70,  w: 55,  h: 60 },   // верх-право
+        { x: 250, y: 260, w: 55,  h: 55 },   // центр-лево
+        { x: 540, y: 380, w: 55,  h: 55 },   // центр-низ
+        { x: 770, y: 280, w: 50,  h: 55 }    // право
+    ],
+    targets: [
+        { x: 140, y: 195, r: 36 },  // верх-лево (между блоками)
+        { x: 870, y: 130, r: 36 },  // верх-право
+        { x: 460, y: 395, r: 36 }   // низ-центр
+    ],
+    availableKeys: ['Space', 'Control', 'Shift']
+};
+
 function startAntennaRepair() {
+    hideScenePanel();
+
     // Чёрный фон
     bg.style.transition = 'opacity 1s ease';
     bg.style.opacity = '0';
-    
     setTimeout(() => {
         bg.style.backgroundImage = 'none';
         bg.style.backgroundColor = 'black';
         bg.style.opacity = '1';
     }, 1000);
 
-    // Создаём модуль игры
+    // Сброс состояния
+    antennaGame.timeLeft = 40;
+    antennaGame.currentTarget = 0;
+    antennaGame.cursorX = 120;
+antennaGame.cursorY = 290;
+    antennaGame.velocityX = 0;
+    antennaGame.velocityY = 0;
+    antennaGame.stunned = false;
+    antennaGame.inTargetZone = false;
+
+    // Создаём модуль
     const module = document.createElement('div');
     module.id = 'antenna-module';
     module.innerHTML = `
-        <svg class="antenna-frame-svg" viewBox="0 0 1000 600" preserveAspectRatio="none">
-            <rect class="antenna-frame-rect" x="1" y="1" width="998" height="598"></rect>
-        </svg>
-
-        <div class="antenna-content">
-            <div class="antenna-header">
-                <div class="antenna-header-left">
-                    <div class="antenna-title">РЕМОНТ АНТЕННЫ — ТРАССИРОВКА КОНТУРА</div>
-                    <div class="antenna-goal">ЦЕЛЬ <span id="current-goal">1</span> / 3</div>
-                </div>
-                <div class="antenna-header-right">
-                    <div class="antenna-timer">ВРЕМЯ: <span id="antenna-timer">00:60</span></div>
-                    <div class="antenna-attempts">
-                        ПОПЫТКИ: 
-                        <span class="attempt-dot active"></span>
-                        <span class="attempt-dot active"></span>
-                        <span class="attempt-dot active"></span>
-                    </div>
-                </div>
+    <svg class="antenna-frame-svg" viewBox="0 0 1000 600" preserveAspectRatio="none">
+        <rect class="antenna-frame-rect" x="1" y="1" width="998" height="598"></rect>
+    </svg>
+    <div class="antenna-content">
+        <div class="antenna-header">
+            <div class="antenna-header-left">
+                <div class="antenna-title">РЕМОНТ АНТЕННЫ — ТРАССИРОВКА КОНТУРА</div>
+                <div class="antenna-goal">УЗЕЛ <span id="current-goal">1</span> / 3</div>
             </div>
-
-            <div class="antenna-field">
-                <svg class="antenna-grid" viewBox="0 0 900 460" preserveAspectRatio="xMidYMid meet">
-                    <!-- ЛИНИИ СВЯЗИ -->
-                    <g class="grid-lines">
-                        <!-- Горизонтальные (4 ряда: y = 60, 180, 300, 420) -->
-                        <!-- Ряд 1 -->
-                        <line x1="60"  y1="60"  x2="180" y2="60"></line>
-                        <line x1="180" y1="60"  x2="300" y2="60"></line>
-                        <line x1="300" y1="60"  x2="420" y2="60"></line>
-                        <line x1="420" y1="60"  x2="540" y2="60"></line>
-                        <line x1="540" y1="60"  x2="660" y2="60"></line>
-                        <line x1="660" y1="60"  x2="780" y2="60"></line>
-
-                        <!-- Ряд 2 -->
-                        <line x1="60"  y1="180" x2="180" y2="180"></line>
-                        <line x1="180" y1="180" x2="300" y2="180"></line>
-                        <line x1="300" y1="180" x2="420" y2="180"></line>
-                        <line x1="420" y1="180" x2="540" y2="180"></line>
-                        <line x1="540" y1="180" x2="660" y2="180"></line>
-                        <line x1="660" y1="180" x2="780" y2="180"></line>
-                        <line x1="780" y1="180" x2="840" y2="180"></line>
-
-                        <!-- Ряд 3 -->
-                        <line x1="60"  y1="300" x2="180" y2="300"></line>
-                        <line x1="180" y1="300" x2="300" y2="300"></line>
-                        <line x1="300" y1="300" x2="420" y2="300"></line>
-                        <line x1="420" y1="300" x2="540" y2="300"></line>
-                        <line x1="540" y1="300" x2="660" y2="300"></line>
-                        <line x1="660" y1="300" x2="780" y2="300"></line>
-
-                        <!-- Ряд 4 -->
-                        <line x1="60"  y1="420" x2="180" y2="420"></line>
-                        <line x1="180" y1="420" x2="300" y2="420"></line>
-                        <line x1="300" y1="420" x2="420" y2="420"></line>
-                        <line x1="420" y1="420" x2="540" y2="420"></line>
-                        <line x1="540" y1="420" x2="660" y2="420"></line>
-                        <line x1="660" y1="420" x2="780" y2="420"></line>
-
-                        <!-- Вертикальные связи -->
-                        <line x1="60"  y1="60"  x2="60"  y2="180"></line>
-                        <line x1="60"  y1="180" x2="60"  y2="300"></line>
-                        <line x1="60"  y1="300" x2="60"  y2="420"></line>
-
-                        <line x1="180" y1="60"  x2="180" y2="180"></line>
-                        <line x1="180" y1="180" x2="180" y2="300"></line>
-                        <line x1="180" y1="300" x2="180" y2="420"></line>
-
-                        <line x1="300" y1="60"  x2="300" y2="180"></line>
-                        <line x1="300" y1="180" x2="300" y2="300"></line>
-                        <line x1="300" y1="300" x2="300" y2="420"></line>
-
-                        <line x1="420" y1="60"  x2="420" y2="180"></line>
-                        <line x1="420" y1="180" x2="420" y2="300"></line>
-                        <line x1="420" y1="300" x2="420" y2="420"></line>
-
-                        <line x1="540" y1="60"  x2="540" y2="180"></line>
-                        <line x1="540" y1="180" x2="540" y2="300"></line>
-                        <line x1="540" y1="300" x2="540" y2="420"></line>
-
-                        <line x1="660" y1="60"  x2="660" y2="180"></line>
-                        <line x1="660" y1="180" x2="660" y2="300"></line>
-                        <line x1="660" y1="300" x2="660" y2="420"></line>
-
-                        <line x1="780" y1="60"  x2="780" y2="180"></line>
-                        <line x1="780" y1="180" x2="780" y2="300"></line>
-                        <line x1="780" y1="300" x2="780" y2="420"></line>
-                    </g>
-
-                    <!-- УЗЛЫ -->
-                    <g class="grid-nodes">
-                        <!-- Ряд 1 (y=60) -->
-                        <circle cx="60"  cy="60"  r="8" class="node safe"></circle>
-                        <circle cx="180" cy="60"  r="8" class="node safe"></circle>
-                        <circle cx="300" cy="60"  r="8" class="node safe"></circle>
-                        <circle cx="420" cy="60"  r="8" class="node corrupted"></circle>
-                        <circle cx="540" cy="60"  r="8" class="node safe"></circle>
-                        <circle cx="660" cy="60"  r="8" class="node safe"></circle>
-                        <circle cx="780" cy="60"  r="8" class="node safe"></circle>
-
-                        <!-- Ряд 2 (y=180) — стартовый ряд -->
-                        <circle cx="60"  cy="180" r="10" class="node start"></circle>
-                        <circle cx="180" cy="180" r="8"  class="node safe"></circle>
-                        <circle cx="300" cy="180" r="10" class="node goal" data-goal="1"></circle>
-                        <circle cx="420" cy="180" r="8"  class="node safe"></circle>
-                        <circle cx="540" cy="180" r="8"  class="node corrupted"></circle>
-                        <circle cx="660" cy="180" r="8"  class="node safe"></circle>
-                        <circle cx="780" cy="180" r="8"  class="node safe"></circle>
-                        <circle cx="840" cy="180" r="8"  class="node safe"></circle>
-
-                        <!-- Ряд 3 (y=300) -->
-                        <circle cx="60"  cy="300" r="8" class="node safe"></circle>
-                        <circle cx="180" cy="300" r="8" class="node corrupted"></circle>
-                        <circle cx="300" cy="300" r="8" class="node safe"></circle>
-                        <circle cx="420" cy="300" r="10" class="node goal" data-goal="2"></circle>
-                        <circle cx="540" cy="300" r="8" class="node safe"></circle>
-                        <circle cx="660" cy="300" r="8" class="node safe"></circle>
-                        <circle cx="780" cy="300" r="8" class="node corrupted"></circle>
-
-                        <!-- Ряд 4 (y=420) -->
-                        <circle cx="60"  cy="420" r="8" class="node safe"></circle>
-                        <circle cx="180" cy="420" r="8" class="node safe"></circle>
-                        <circle cx="300" cy="420" r="8" class="node corrupted"></circle>
-                        <circle cx="420" cy="420" r="8" class="node safe"></circle>
-                        <circle cx="540" cy="420" r="8" class="node safe"></circle>
-                        <circle cx="660" cy="420" r="8" class="node safe"></circle>
-                        <circle cx="780" cy="420" r="10" class="node goal" data-goal="3"></circle>
-                    </g>
-
-                    <!-- НОМЕРА ЦЕЛЕЙ -->
-                    <g class="goal-labels">
-                        <text x="300" y="184" class="goal-text">1</text>
-                        <text x="420" y="304" class="goal-text">2</text>
-                        <text x="780" y="424" class="goal-text">3</text>
-                    </g>
-
-                    <!-- ВОЛНЫ ПОМЕХ (статичные пока) -->
-                    <circle cx="180" cy="60" r="7" class="wave wave-1"></circle>
-                    <circle cx="660" cy="420" r="7" class="wave wave-2"></circle>
-
-                    <!-- КУРСОР ИГРОКА -->
-                    <circle cx="60" cy="180" r="6" class="player-cursor"></circle>
-                </svg>
-            </div>
-
-            <div class="antenna-footer">
-                <div class="antenna-legend">
-                    <span><span class="legend-dot start"></span>СТАРТ</span>
-                    <span><span class="legend-dot goal"></span>ЦЕЛЬ</span>
-                    <span><span class="legend-dot corrupted"></span>ПОВРЕЖДЁННЫЙ</span>
-                    <span><span class="legend-dot wave"></span>ПОМЕХА</span>
-                </div>
-                <div class="antenna-hint">УПРАВЛЕНИЕ: ↑ ↓ ← →</div>
+            <div class="antenna-header-right">
+                <div class="antenna-timer">ВРЕМЯ: <span id="antenna-timer">00:40</span></div>
             </div>
         </div>
-    `;
-    
+        <div class="antenna-field" id="antenna-field">
+            <div class="player-cursor" id="player-cursor"></div>
+        </div>
+        <div class="antenna-footer">
+            <div class="antenna-legend">
+                <span><span class="legend-dot player"></span>КУРСОР</span>
+                <span><span class="legend-dot target"></span>ЦЕЛЬ</span>
+                <span><span class="legend-dot danger"></span>РАЗРЯД</span>
+                <span><span class="legend-dot wall"></span>ПРЕПЯТСТВИЕ</span>
+            </div>
+            <div class="antenna-hint">УПРАВЛЕНИЕ: ↑ ↓ ← →</div>
+        </div>
+    </div>
+`;
     document.body.appendChild(module);
 
-    // Запускаем анимацию рамки
+    // Анимация рамки
     setTimeout(() => {
         const rect = module.querySelector('.antenna-frame-rect');
         rect.style.strokeDashoffset = '0';
-    }, 500);
+        rect.classList.add('filled');
+    }, 300);
 
-    // Плавное появление содержимого
+    // Плавное появление элементов
+const elementsToShow = ['.antenna-header', '.antenna-field', '.antenna-footer'];
+elementsToShow.forEach((sel, i) => {
     setTimeout(() => {
-        module.querySelector('.antenna-content').style.opacity = '1';
-    }, 1500);
-    // Запускаем логику после появления макета
+        const el = module.querySelector(sel);
+        if (el) {
+            el.classList.add('visible-element');
+            el.style.opacity = '1';  // ← гарантированно показываем
+        }
+    }, 1200 + i * 350);
+});
+
+// Запуск игры — ждём пока поле станет видимым
 setTimeout(() => {
-    initAntennaGame();
-}, 2500);
-}
-// === ЛОГИКА МИНИ-ИГРЫ: РЕМОНТ АНТЕННЫ ===
+    buildAntennaField();
+    spawnTarget(0);
+    startAntennaControls();
+    startAntennaTimer();
+    antennaGameLoop();
+}, 1200 + elementsToShow.length * 350 + 600);
 
-// Глобальные переменные мини-игры
-let antennaState = {
-    cursorX: 60,
-    cursorY: 180,
-    nodes: [],          // массив всех узлов: {x, y, type}
-    keyHandler: null,    // ссылка на обработчик клавиш, чтобы его можно было снять
-    currentGoal: 1,
-    timeLeft: 60,          
-    timerInterval: null,
-    waves: [],             
-    waveInterval: null,
-    attempts: 3
-};
+function buildAntennaField() {
+    const field = document.getElementById('antenna-field');
+    if (!field) return;
 
-// Шаг сетки (расстояние между узлами)
-const STEP_X = 120;
-const STEP_Y = 120;
+    // Получаем реальные размеры поля
+    const rect = field.getBoundingClientRect();
+    antennaGame.fieldWidth = rect.width;
+    antennaGame.fieldHeight = rect.height;
 
-function initAntennaGame() {
-    // Полный старт игры (только один раз, при первом входе)
-    antennaState.attempts = 3;
-    antennaState.nodes = [];
-    
-    const nodeElements = document.querySelectorAll('#antenna-module .node');
-    
-    nodeElements.forEach(el => {
-        const x = parseFloat(el.getAttribute('cx'));
-        const y = parseFloat(el.getAttribute('cy'));
-        let type = 'safe';
-        
-        if (el.classList.contains('start'))     type = 'start';
-        if (el.classList.contains('goal'))      type = 'goal';
-        if (el.classList.contains('corrupted')) type = 'corrupted';
-        
-        const goalNumber = el.getAttribute('data-goal');
-        
-        antennaState.nodes.push({ 
-            x, y, type, element: el,
-            originalType: type,                       // === НОВОЕ ===
-            originalGoal: goalNumber ? parseInt(goalNumber) : null,  // === НОВОЕ ===
-            goalNumber: goalNumber ? parseInt(goalNumber) : null
+    // Масштаб (конфиг в координатах 900x480)
+    const scaleX = antennaGame.fieldWidth / 900;
+    const scaleY = antennaGame.fieldHeight / 480;
+
+    antennaGame.obstacles = [];
+    antennaGame.dangers = [];
+
+    // Препятствия
+    ANTENNA_CONFIG.obstacles.forEach(o => {
+        const el = document.createElement('div');
+        el.className = 'obstacle';
+        el.style.left = (o.x * scaleX) + 'px';
+        el.style.top = (o.y * scaleY) + 'px';
+        el.style.width = (o.w * scaleX) + 'px';
+        el.style.height = (o.h * scaleY) + 'px';
+        field.appendChild(el);
+        antennaGame.obstacles.push({
+            x: o.x * scaleX,
+            y: o.y * scaleY,
+            w: o.w * scaleX,
+            h: o.h * scaleY
         });
     });
 
-    // Запускаем первую попытку
-    resetAntennaAttempt();
-}
+    // Опасности
+    ANTENNA_CONFIG.dangers.forEach(d => {
+        const el = document.createElement('div');
+        el.className = 'danger-zone';
+        el.style.left = (d.x * scaleX) + 'px';
+        el.style.top = (d.y * scaleY) + 'px';
+        el.style.width = (d.w * scaleX) + 'px';
+        el.style.height = (d.h * scaleY) + 'px';
+        field.appendChild(el);
+        antennaGame.dangers.push({
+            x: d.x * scaleX,
+            y: d.y * scaleY,
+            w: d.w * scaleX,
+            h: d.h * scaleY
+        });
+    });
 
-function handleAntennaKey(e) {
-    let dx = 0, dy = 0;
-    
-    if (e.key === 'ArrowUp')    dy = -STEP_Y;
-    if (e.key === 'ArrowDown')  dy = STEP_Y;
-    if (e.key === 'ArrowLeft')  dx = -STEP_X;
-    if (e.key === 'ArrowRight') dx = STEP_X;
-    
-    if (dx === 0 && dy === 0) return;
-    
-    const targetX = antennaState.cursorX + dx;
-    const targetY = antennaState.cursorY + dy;
-    
-    const targetNode = antennaState.nodes.find(n => 
-        Math.abs(n.x - targetX) < 5 && Math.abs(n.y - targetY) < 5
-    );
-    
-    if (!targetNode) {
-        shakeCursor();
-        return;
-    }
-    
-    if (targetNode.type === 'corrupted') {
-        shakeCursor();
-        return;
-    }
-    
-    // === НОВОЕ: проверка цели ===
-    if (targetNode.type === 'goal' && targetNode.goalNumber) {
-        // Если это не текущая цель — нельзя
-        if (targetNode.goalNumber !== antennaState.currentGoal) {
-            shakeCursor();
-            return;
-        }
-    }
-    
-    // Двигаем курсор
-    moveCursor(targetNode.x, targetNode.y);
-    
-    // === НОВОЕ: если зашли на нужную цель — засчитываем ===
-    if (targetNode.type === 'goal' && targetNode.goalNumber === antennaState.currentGoal) {
-        completeGoal(targetNode);
-    }
-}
+    antennaGame.cursorX = 120 * scaleX;
+    antennaGame.cursorY = 290 * scaleY;
+    updateCursorPosition();
 
-function moveCursor(x, y) {
-    // === НОВОЕ: оставляем след на старой позиции ===
-    leaveTrail(antennaState.cursorX, antennaState.cursorY);
-    
-    antennaState.cursorX = x;
-    antennaState.cursorY = y;
-    
-    const cursor = document.querySelector('.player-cursor');
+    // Плавно показываем курсор, когда он уже на правильной позиции
+    const cursor = document.getElementById('player-cursor');
     if (cursor) {
-        cursor.setAttribute('cx', x);
-        cursor.setAttribute('cy', y);
+        setTimeout(() => {
+            cursor.style.opacity = '1';
+        }, 600);
     }
-    
-    // Проверяем волны
-    antennaState.waves.forEach(wave => {
-        const wavePos = wave.path[wave.currentIndex];
-        if (Math.abs(wavePos.x - x) < 5 && Math.abs(wavePos.y - y) < 5) {
-            antennaWaveHit();
+}
+}
+
+function spawnTarget(index) {
+    const field = document.getElementById('antenna-field');
+    if (!field) return;
+
+    // Удаляем старую цель
+    const oldTarget = field.querySelector('.target-zone');
+    if (oldTarget) oldTarget.remove();
+
+    const config = ANTENNA_CONFIG.targets[index];
+    if (!config) return;
+
+    const scaleX = antennaGame.fieldWidth / 900;
+    const scaleY = antennaGame.fieldHeight / 480;
+
+    const target = document.createElement('div');
+    target.className = 'target-zone';
+    target.style.left = (config.x * scaleX) + 'px';
+    target.style.top = (config.y * scaleY) + 'px';
+    target.style.width = (config.r * 2) + 'px';
+    target.style.height = (config.r * 2) + 'px';
+    field.appendChild(target);
+
+    antennaGame.targetX = config.x * scaleX;
+    antennaGame.targetY = config.y * scaleY;
+    antennaGame.targetRadius = config.r;
+}
+
+function startAntennaControls() {
+    antennaGame.keyHandler = (e) => {
+        if (antennaGame.stunned) return;
+        if (e.key === 'ArrowUp')    antennaGame.keys.up    = true;
+        if (e.key === 'ArrowDown')  antennaGame.keys.down  = true;
+        if (e.key === 'ArrowLeft')  antennaGame.keys.left  = true;
+        if (e.key === 'ArrowRight') antennaGame.keys.right = true;
+
+        // Проверка нажатия нужной клавиши в зоне
+        if (antennaGame.inTargetZone && antennaGame.requiredKey) {
+            const pressed = e.key === ' ' ? 'Space' : e.key;
+            if (pressed === antennaGame.requiredKey) {
+                completeTarget();
+            }
+        }
+    };
+    antennaGame.keyUpHandler = (e) => {
+        if (e.key === 'ArrowUp')    antennaGame.keys.up    = false;
+        if (e.key === 'ArrowDown')  antennaGame.keys.down  = false;
+        if (e.key === 'ArrowLeft')  antennaGame.keys.left  = false;
+        if (e.key === 'ArrowRight') antennaGame.keys.right = false;
+    };
+    document.addEventListener('keydown', antennaGame.keyHandler);
+    document.addEventListener('keyup', antennaGame.keyUpHandler);
+}
+
+function antennaGameLoop() {
+    if (!antennaGame.stunned) {
+        // Целевое ускорение в зависимости от нажатых клавиш
+        let targetAccelX = 0, targetAccelY = 0;
+        if (antennaGame.keys.up)    targetAccelY -= 1;
+        if (antennaGame.keys.down)  targetAccelY += 1;
+        if (antennaGame.keys.left)  targetAccelX -= 1;
+        if (antennaGame.keys.right) targetAccelX += 1;
+
+        // Нормализация диагонали (чтобы по диагонали не было быстрее)
+        if (targetAccelX !== 0 && targetAccelY !== 0) {
+            const norm = 1 / Math.sqrt(2);
+            targetAccelX *= norm;
+            targetAccelY *= norm;
+        }
+
+        // Параметры физики
+        const acceleration = 0.35;  // как быстро разгоняется
+        const friction = 0.92;      // как быстро тормозит (1 = нет трения)
+        const maxSpeed = 5.5;       // максимальная скорость
+
+        // Применяем ускорение
+        antennaGame.velocityX += targetAccelX * acceleration;
+        antennaGame.velocityY += targetAccelY * acceleration;
+
+        // Применяем трение (когда клавиши отпущены — курсор плавно тормозит)
+        antennaGame.velocityX *= friction;
+        antennaGame.velocityY *= friction;
+
+        // Ограничение максимальной скорости
+        const speed = Math.sqrt(antennaGame.velocityX ** 2 + antennaGame.velocityY ** 2);
+        if (speed > maxSpeed) {
+            antennaGame.velocityX = (antennaGame.velocityX / speed) * maxSpeed;
+            antennaGame.velocityY = (antennaGame.velocityY / speed) * maxSpeed;
+        }
+
+        // Останавливаем совсем медленное движение (чтобы не было дрейфа)
+        if (Math.abs(antennaGame.velocityX) < 0.05) antennaGame.velocityX = 0;
+        if (Math.abs(antennaGame.velocityY) < 0.05) antennaGame.velocityY = 0;
+
+        // Пробуем двигаться по X
+        let newX = antennaGame.cursorX + antennaGame.velocityX;
+        if (!collidesWithObstacle(newX, antennaGame.cursorY) &&
+            newX >= 11 && newX <= antennaGame.fieldWidth - 11) {
+            antennaGame.cursorX = newX;
+        } else {
+            antennaGame.velocityX = 0; // удар о стену — останавливаем по X
+        }
+
+        // Пробуем двигаться по Y
+        let newY = antennaGame.cursorY + antennaGame.velocityY;
+        if (!collidesWithObstacle(antennaGame.cursorX, newY) &&
+            newY >= 11 && newY <= antennaGame.fieldHeight - 11) {
+            antennaGame.cursorY = newY;
+        } else {
+            antennaGame.velocityY = 0; // удар о стену — останавливаем по Y
+        }
+
+        updateCursorPosition();
+
+     // Проверка опасностей (только если не в процессе оглушения)
+if (!antennaGame.stunned && collidesWithDanger(antennaGame.cursorX, antennaGame.cursorY)) {
+    stunCursor();
+}
+
+        // Проверка цели
+        checkTargetZone();
+    }
+
+    antennaGame.gameLoopId = requestAnimationFrame(antennaGameLoop);
+}
+
+function collidesWithObstacle(x, y) {
+    const r = 11;
+    return antennaGame.obstacles.some(o =>
+        x + r > o.x && x - r < o.x + o.w &&
+        y + r > o.y && y - r < o.y + o.h
+    );
+}
+
+function collidesWithDanger(x, y) {
+    const r = 11;
+    return antennaGame.dangers.some(d =>
+        x + r > d.x && x - r < d.x + d.w &&
+        y + r > d.y && y - r < d.y + d.h
+    );
+}
+
+function updateCursorPosition() {
+    const cursor = document.getElementById('player-cursor');
+    if (!cursor) return;
+    cursor.style.left = antennaGame.cursorX + 'px';
+    cursor.style.top = antennaGame.cursorY + 'px';
+}
+
+function stunCursor() {
+    if (antennaGame.stunned) return;
+    antennaGame.stunned = true;
+    flashRedScreen();
+
+    const cursor = document.getElementById('player-cursor');
+    if (cursor) cursor.classList.add('stunned');
+
+    // Отталкиваем курсор от центра ближайшей опасности
+    const danger = findNearestDanger();
+    if (danger) {
+        const cx = danger.x + danger.w / 2;
+        const cy = danger.y + danger.h / 2;
+        const dx = antennaGame.cursorX - cx;
+        const dy = antennaGame.cursorY - cy;
+        const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+        const pushStrength = 8;
+        antennaGame.velocityX = (dx / dist) * pushStrength;
+        antennaGame.velocityY = (dy / dist) * pushStrength;
+    } else {
+        antennaGame.velocityX = 0;
+        antennaGame.velocityY = 0;
+    }
+
+    // Замедление: блокируем управление на 1 секунду, но скорость гасится трением
+    antennaGame.keys = { up: false, down: false, left: false, right: false };
+
+    setTimeout(() => {
+        antennaGame.stunned = false;
+        if (cursor) cursor.classList.remove('stunned');
+    }, 1000);
+}
+
+// Найти ближайшую опасность к курсору
+function findNearestDanger() {
+    let nearest = null;
+    let minDist = Infinity;
+    antennaGame.dangers.forEach(d => {
+        const cx = d.x + d.w / 2;
+        const cy = d.y + d.h / 2;
+        const dx = antennaGame.cursorX - cx;
+        const dy = antennaGame.cursorY - cy;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < minDist) {
+            minDist = dist;
+            nearest = d;
         }
     });
+    return nearest;
 }
 
-function leaveTrail(x, y) {
-    const svg = document.querySelector('.antenna-grid');
-    if (!svg) return;
-    
-    const trail = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-    trail.setAttribute('cx', x);
-    trail.setAttribute('cy', y);
-    trail.setAttribute('r', 5);
-    trail.classList.add('cursor-trail');
-    
-    svg.appendChild(trail);
-    
-    // Удаляем след через 1.2 секунды
-    setTimeout(() => trail.remove(), 1200);
+function checkTargetZone() {
+    if (!antennaGame.targetX) return;
+    const dx = antennaGame.cursorX - antennaGame.targetX;
+    const dy = antennaGame.cursorY - antennaGame.targetY;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+
+    if (dist < antennaGame.targetRadius && !antennaGame.inTargetZone) {
+        enterTargetZone();
+    } else if (dist >= antennaGame.targetRadius && antennaGame.inTargetZone) {
+        exitTargetZone();
+    }
 }
-function completeGoal(node) {
-    // Помечаем цель как пройденную
-    node.element.classList.add('completed');
-    
-    // Увеличиваем счётчик
-    antennaState.currentGoal++;
-    
-    // Обновляем шапку
-    const goalLabel = document.getElementById('current-goal');
-    if (goalLabel) {
-        if (antennaState.currentGoal > 3) {
-            // Все цели пройдены — победа
-            goalLabel.textContent = '3';
-            setTimeout(() => antennaVictory(), 600);
-        } else {
-            goalLabel.textContent = antennaState.currentGoal;
+
+function enterTargetZone() {
+    antennaGame.inTargetZone = true;
+
+    // Случайная клавиша
+    const keys = ANTENNA_CONFIG.availableKeys;
+    antennaGame.requiredKey = keys[Math.floor(Math.random() * keys.length)];
+
+    const cursor = document.getElementById('player-cursor');
+    if (cursor) {
+        cursor.classList.add('in-zone');
+        const label = antennaGame.requiredKey === 'Space' ? 'SPACE'
+                    : antennaGame.requiredKey === 'Control' ? 'CTRL'
+                    : 'SHIFT';
+        cursor.textContent = label;
+    }
+
+    // Запускаем таймер на 3 секунды
+    antennaGame.keyTimeLeft = 3000;
+    const startTime = Date.now();
+
+    antennaGame.keyTimerInterval = setInterval(() => {
+        const elapsed = Date.now() - startTime;
+        if (elapsed >= 3000) {
+            clearInterval(antennaGame.keyTimerInterval);
+            antennaGame.keyTimerInterval = null;
+            // Не нажал — оглушение
+            if (antennaGame.inTargetZone) {
+                exitTargetZone();
+                stunCursor();
+            }
         }
+    }, 100);
+}
+
+function exitTargetZone() {
+    antennaGame.inTargetZone = false;
+    antennaGame.requiredKey = null;
+    if (antennaGame.keyTimerInterval) {
+        clearInterval(antennaGame.keyTimerInterval);
+        antennaGame.keyTimerInterval = null;
     }
-    
-    // Меняем тип узла, чтобы по нему можно было ходить дальше как по обычному
-    node.type = 'safe';
-    node.goalNumber = null;
-}
-
-function antennaVictory() {
-    stopAntennaGame();
-    
-    // Временное сообщение — потом сделаем красивый переход
-    const module = document.getElementById('antenna-module');
-    if (!module) return;
-    
-    const message = document.createElement('div');
-    message.id = 'antenna-victory';
-    message.textContent = 'КОНТУР ВОССТАНОВЛЕН';
-    module.appendChild(message);
-
-    // Через 2.5 секунды переход к хорошей концовке
-    setTimeout(() => {
-        module.style.transition = 'opacity 1.5s ease';
-        module.style.opacity = '0';
-        setTimeout(() => {
-            module.remove();
-            // Заглушка — потом сделаем настоящую сцену хорошей концовки
-            renderScene('quiet_moment');
-        }, 1500);
-    }, 2500);
-}
-
-function shakeCursor() {
-    const cursor = document.querySelector('.player-cursor');
-    if (!cursor) return;
-    
-    cursor.classList.add('cursor-shake');
-    setTimeout(() => cursor.classList.remove('cursor-shake'), 300);
-}
-
-function stopAntennaGame() {
-    // Снимаем обработчик клавиш
-    if (antennaState.keyHandler) {
-        document.removeEventListener('keydown', antennaState.keyHandler);
-        antennaState.keyHandler = null;
+    const cursor = document.getElementById('player-cursor');
+    if (cursor) {
+        cursor.classList.remove('in-zone');
+        cursor.textContent = '';
     }
-    
-    // === НОВОЕ: останавливаем таймер ===
-    stopAntennaTimer();
+}
+
+function completeTarget() {
+    if (antennaGame.keyTimerInterval) {
+        clearInterval(antennaGame.keyTimerInterval);
+        antennaGame.keyTimerInterval = null;
+    }
+    antennaGame.inTargetZone = false;
+    antennaGame.requiredKey = null;
+
+    const cursor = document.getElementById('player-cursor');
+    if (cursor) {
+        cursor.classList.remove('in-zone');
+        cursor.textContent = '';
+    }
+
+    antennaGame.currentTarget++;
+    const goalLabel = document.getElementById('current-goal');
+    if (goalLabel) goalLabel.textContent = Math.min(antennaGame.currentTarget + 1, 3);
+
+    if (antennaGame.currentTarget >= 3) {
+        antennaVictory();
+    } else {
+        spawnTarget(antennaGame.currentTarget);
+    }
 }
 
 function startAntennaTimer() {
-    updateTimerDisplay();
-    
-    antennaState.timerInterval = setInterval(() => {
-        antennaState.timeLeft--;
-        updateTimerDisplay();
-        
-        // Последние 10 секунд — режим тревоги
-        if (antennaState.timeLeft <= 10) {
-            const timerEl = document.querySelector('.antenna-timer');
-            if (timerEl) timerEl.classList.add('warning');
+    updateAntennaTimerDisplay();
+    antennaGame.timerInterval = setInterval(() => {
+        antennaGame.timeLeft--;
+        updateAntennaTimerDisplay();
+        if (antennaGame.timeLeft <= 10) {
+            const t = document.querySelector('.antenna-timer');
+            if (t) t.classList.add('warning');
         }
-        
-        // Время вышло
-        if (antennaState.timeLeft <= 0) {
-            stopAntennaTimer();
+        if (antennaGame.timeLeft <= 0) {
+            clearInterval(antennaGame.timerInterval);
             antennaTimeout();
         }
     }, 1000);
 }
 
-function stopAntennaTimer() {
-    if (antennaState.timerInterval) {
-        clearInterval(antennaState.timerInterval);
-        antennaState.timerInterval = null;
-    }
-    
-    // Убираем красную пульсацию
-    const timerEl = document.querySelector('.antenna-timer');
-    if (timerEl) timerEl.classList.remove('warning');
-}
-
-function updateTimerDisplay() {
-    const timerSpan = document.getElementById('antenna-timer');
-    if (!timerSpan) return;
-    
-    const seconds = Math.max(0, antennaState.timeLeft);
-    const formatted = '00:' + String(seconds).padStart(2, '0');
-    timerSpan.textContent = formatted;
+function updateAntennaTimerDisplay() {
+    const span = document.getElementById('antenna-timer');
+    if (!span) return;
+    const s = Math.max(0, antennaGame.timeLeft);
+    span.textContent = '00:' + String(s).padStart(2, '0');
 }
 
 function antennaTimeout() {
-    antennaFail('ВРЕМЯ ИСТЕКЛО');
-}
-
-function antennaWaveHit() {
-    antennaFail('КУРСОР ПЕРЕХВАЧЕН');
-}
-
-function startAntennaWaves() {
-    // Описываем маршруты волн
-    antennaState.waves = [
-        {
-            element: document.querySelector('.wave-1'),
-            path: [
-                { x: 180, y: 60 },
-                { x: 300, y: 60 },
-                { x: 300, y: 180 },
-                { x: 180, y: 180 }
-            ],
-            currentIndex: 0
-        },
-        {
-            element: document.querySelector('.wave-2'),
-            path: [
-                { x: 660, y: 420 },
-                { x: 540, y: 420 },
-                { x: 540, y: 300 },
-                { x: 660, y: 300 }
-            ],
-            currentIndex: 0
-        }
-    ];
-    
-    // Каждую секунду двигаем все волны на следующий узел
-    antennaState.waveInterval = setInterval(() => {
-        antennaState.waves.forEach(wave => {
-            wave.currentIndex = (wave.currentIndex + 1) % wave.path.length;
-            const next = wave.path[wave.currentIndex];
-            
-            if (wave.element) {
-                wave.element.setAttribute('cx', next.x);
-                wave.element.setAttribute('cy', next.y);
-            }
-            
-            // Проверяем столкновение с курсором
-            checkWaveCollision(wave, next);
-        });
-    }, 1000);
-}
-
-function stopAntennaWaves() {
-    if (antennaState.waveInterval) {
-        clearInterval(antennaState.waveInterval);
-        antennaState.waveInterval = null;
-    }
-}
-
-function checkWaveCollision(wave, wavePos) {
-    // Если волна и курсор на одном узле — провал
-    if (Math.abs(wavePos.x - antennaState.cursorX) < 5 && 
-        Math.abs(wavePos.y - antennaState.cursorY) < 5) {
-        antennaWaveHit();
-    }
-}
-
-function antennaFail(reason) {
-    // Останавливаем игру (но не снимаем обработчик клавиш — пригодится для следующей попытки)
-    stopAntennaTimer();
-    stopAntennaWaves();
-    
-    // Уменьшаем счётчик попыток
-    antennaState.attempts--;
-    updateAttemptsDisplay();
-    
-    // Красная вспышка
     flashRedScreen();
-    
-    if (antennaState.attempts <= 0) {
-        // Окончательный проигрыш
-        setTimeout(() => antennaFinalLoss(), 800);
-    } else {
-        // Показываем короткое сообщение и перезапускаем
-        showAttemptFailMessage(reason);
-        setTimeout(() => resetAntennaAttempt(), 1800);
-    }
+    antennaFinalLoss();
 }
 
-function resetAntennaAttempt() {
-    // Сбрасываем цели
-    antennaState.currentGoal = 1;
-    antennaState.timeLeft = 60;
-    
-    // Возвращаем тип узлов к исходному (золотые цели опять золотые)
-    antennaState.nodes.forEach(n => {
-        n.type = n.originalType;
-        n.goalNumber = n.originalGoal;
-        n.element.classList.remove('completed');
-    });
-    
-    // Возвращаем курсор на старт
-    const start = antennaState.nodes.find(n => n.type === 'start');
-    antennaState.cursorX = start.x;
-    antennaState.cursorY = start.y;
-    const cursor = document.querySelector('.player-cursor');
-    if (cursor) {
-        cursor.setAttribute('cx', start.x);
-        cursor.setAttribute('cy', start.y);
-    }
-    
-    // Обновляем счётчик цели в шапке
-    const goalLabel = document.getElementById('current-goal');
-    if (goalLabel) goalLabel.textContent = '1';
-    
-    // Снимаем красную пульсацию таймера
-    const timerEl = document.querySelector('.antenna-timer');
-    if (timerEl) timerEl.classList.remove('warning');
-    updateTimerDisplay();
-    
-    // Вешаем обработчик клавиш (если не висит)
-    if (!antennaState.keyHandler) {
-        antennaState.keyHandler = (e) => handleAntennaKey(e);
-        document.addEventListener('keydown', antennaState.keyHandler);
-    }
-    
-    // Запускаем таймер и волны
-    startAntennaTimer();
-    startAntennaWaves();
-}
-function updateAttemptsDisplay() {
-    const dots = document.querySelectorAll('.attempt-dot');
-    dots.forEach((dot, index) => {
-        if (index < antennaState.attempts) {
-            dot.classList.add('active');
-        } else {
-            dot.classList.remove('active');
-        }
-    });
-}
 
 function flashRedScreen() {
     const flash = document.createElement('div');
     flash.id = 'red-flash';
     document.body.appendChild(flash);
-    
     setTimeout(() => flash.remove(), 600);
 }
 
-function showAttemptFailMessage(text) {
+function stopAntennaGame() {
+    if (antennaGame.keyHandler) {
+        document.removeEventListener('keydown', antennaGame.keyHandler);
+        antennaGame.keyHandler = null;
+    }
+    if (antennaGame.keyUpHandler) {
+        document.removeEventListener('keyup', antennaGame.keyUpHandler);
+        antennaGame.keyUpHandler = null;
+    }
+    if (antennaGame.timerInterval) {
+        clearInterval(antennaGame.timerInterval);
+        antennaGame.timerInterval = null;
+    }
+    if (antennaGame.keyTimerInterval) {
+        clearInterval(antennaGame.keyTimerInterval);
+        antennaGame.keyTimerInterval = null;
+    }
+    if (antennaGame.gameLoopId) {
+        cancelAnimationFrame(antennaGame.gameLoopId);
+        antennaGame.gameLoopId = null;
+    }
+}
+
+function antennaVictory() {
+    stopAntennaGame();
+    stopBreathingAudio();
+
     const module = document.getElementById('antenna-module');
     if (!module) return;
-    
-    const message = document.createElement('div');
-    message.className = 'antenna-fail-temp';
-    message.textContent = text;
-    module.appendChild(message);
-    
-    setTimeout(() => message.remove(), 1700);
+
+    const msg = document.createElement('div');
+    msg.id = 'antenna-victory';
+    msg.textContent = 'КОНТУР ВОССТАНОВЛЕН';
+    module.appendChild(msg);
+
+    setTimeout(() => {
+        module.style.transition = 'opacity 1.5s ease';
+        module.style.opacity = '0';
+        setTimeout(() => {
+            module.remove();
+            renderScene('quiet_moment');
+        }, 1500);
+    }, 2500);
 }
 
 function antennaFinalLoss() {
     stopAntennaGame();
-    
-    // Все узлы краснеют
-    document.querySelectorAll('#antenna-module .node').forEach(el => {
-        el.classList.add('burned');
-    });
-    
+    stopBreathingAudio();
+
     const module = document.getElementById('antenna-module');
     if (!module) return;
-    
-    const message = document.createElement('div');
-    message.id = 'antenna-fail';
-    message.textContent = 'КОНТУР СГОРЕЛ';
-    module.appendChild(message);
-    
-    // Через 3 секунды переход к плохой концовке
+
+    const msg = document.createElement('div');
+    msg.id = 'antenna-fail';
+    msg.textContent = 'КОНТУР СГОРЕЛ';
+    module.appendChild(msg);
+
     setTimeout(() => {
         module.style.transition = 'opacity 1.5s ease';
         module.style.opacity = '0';

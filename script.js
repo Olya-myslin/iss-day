@@ -342,49 +342,11 @@ const story = {
     ]
 },
 'eva_exit': {
-    text: "Люк открывается.<br>Тишина.<br>Абсолютная, оглушающая тишина.<br>Под тобой — Земля. Над тобой — всё остальное.",
-    background: 'url("images/spacesuit3.png")', // Фон с видом из скафандра
+    text: "Люк открывается.<br>Тишина. Абсолютная, оглушающая тишина.<br>Под тобой — Земля. Над тобой — всё остальное.<br>Скафандр мягко гудит, и на секунду тебе кажется, что ты перестал дышать.",
+    background: 'url("images/111.png")',
     showAlarm: false,
     options: [
-        { text: "Пристегнуть страховочный фал", nextScene: 'eva_tether_check' }
-    ]
-},
-// === НОВЫЕ СЦЕНЫ: ПУТЬ К АНТЕННЕ ===
-
-'eva_tether_check': {
-    text: "Люк позади с шипением закрывается.<br>Ты один.<br>Первый шаг — проверка карабина страховочного фала.<br>Щёлк. Теперь ты — часть станции.",
-    background: 'url("images/eva_tether.png")',
-    showAlarm: false,
-    options: [
-        { text: "Начать движение к ферме P3", nextScene: 'eva_traverse' }
-    ]
-},
-
-'eva_traverse': {
-    text: "Перебирая руками по холодным поручням,<br>ты плывёшь вдоль корпуса.<br>Станция огромна, похожа на скелет<br>гигантского механического зверя.",
-    background: 'url("images/eva_traverse.png")',
-    showAlarm: false,
-    options: [
-        { text: "Продолжить путь", nextScene: 'eva_sunrise' }
-    ]
-},
-
-'eva_sunrise': {
-    text: "Внезапно горизонт вспыхивает алмазным огнём.<br>Орбитальный рассвет.<br>Визор шлема мгновенно темнеет, спасая зрение.",
-    background: 'url("images/eva_sunrise.png")',
-    showAlarm: false,
-    options: [
-        { text: "Добраться до места работ", nextScene: 'eva_worksite_arrival' }
-    ]
-},
-
-'eva_worksite_arrival': {
-    text: "Вот она. Антенна S-диапазона. Кабель оторван и медленно<br>вращается, изредка высекая сноп холодных искр.<br>ЦУП: «Вы на месте. Подключайте модуль, будем прозванивать схему».",
-    background: 'url("images/eva_antenna_dmg.png")',
-    showAlarm: false,
-    options: [
-        // Эта кнопка теперь запускает мини-игру
-        { text: "Подключить модуль и начать диагностику", action: 'startAntennaRepair' }
+        { text: "Двигаться к антенне", nextScene: 'eva_traverse' }
     ]
 },
 
@@ -608,48 +570,40 @@ if (scene.isAssistSupport) {
                     }
                     if (opt.item) btn.dataset.item = opt.item;
 
-                  btn.onclick = () => {
-    playClickSound();
+                    btn.onclick = () => {
+                        playClickSound();
+                        if (opt.readiness) {
+                            updateReadiness(opt.readiness);
+                        }
 
-    if (opt.readiness) {
-        updateReadiness(opt.readiness);
-    }
-    
-    // === НОВОЕ: проверяем, есть ли кастомное действие ===
-    if (opt.action) {
-        if (opt.action === 'startAntennaRepair') {
-            
-            // Плавно прячем панель перед запуском игры
-            hideScenePanel();
-            setTimeout(() => {
-                startAntennaRepair();
-            }, 1000);
-            
-            return;
-        }
-        // Здесь можно будет добавить другие действия в будущем
-        
-    } else if (opt.nextScene === 'calibration_full') {
-        startCalibration('full');
-        return;
-    } else if (opt.nextScene === 'calibration_fast') {
-        startCalibration('fast');
-        return;
-    } else if (opt.nextScene === 'window_view') {
-        bg.style.opacity = '0';
-        gameContainer.style.opacity = '0';
-        allFloaters.forEach(el => { if(el) el.style.opacity = '0'; });
+                        // --- ПОЛНАЯ КАЛИБРОВКА ---
+                        if (opt.nextScene === 'calibration_full') {
+                            startCalibration('full');
+                            return;
+                        }
 
-        setTimeout(() => {
-            renderScene(opt.nextScene);
-        }, 2000);
+                        // --- БЫСТРАЯ ПРОВЕРКА ---
+                        if (opt.nextScene === 'calibration_fast') {
+                            startCalibration('fast');
+                            return;
+                        }
 
-        return;
-    } else {
-        // Обычная смена сцены
-        renderScene(opt.nextScene);
-    }
-};
+                        // --- ИЛЛЮМИНАТОР ---
+                        if (opt.nextScene === 'window_view') {
+                            bg.style.opacity = '0';
+                            gameContainer.style.opacity = '0';
+                            allFloaters.forEach(el => { if(el) el.style.opacity = '0'; });
+
+                            setTimeout(() => {
+                                renderScene(opt.nextScene);
+                            }, 2000);
+
+                            return;
+                        }
+
+                        // --- ОБЫЧНАЯ СЦЕНА ---
+                        renderScene(opt.nextScene);
+                    };
 
                     // ПОДСВЕТКА ПРИ НАВЕДЕНИИ
                     btn.onmouseenter = () => {
@@ -1416,6 +1370,197 @@ function fadeOutMainMusic() {
         }
     }, 100);
 }
+
+function startBreathingAudio() {
+    if (breathingAudio) return;
+
+    breathingAudio = new Audio('audio/gear_024.mp3');
+    breathingAudio.loop = true;
+    breathingAudio.volume = 0;
+    breathingAudio.play().catch(() => {});
+
+    let fadeIn = setInterval(() => {
+        if (breathingAudio && breathingAudio.volume < 0.5) {
+            breathingAudio.volume += 0.01;
+        } else {
+            clearInterval(fadeIn);
+        }
+    }, 100);
+}
+
+function stopBreathingAudio() {
+    if (!breathingAudio) return;
+
+    const snd = breathingAudio;
+    breathingAudio = null;
+
+    let fadeOut = setInterval(() => {
+        if (snd.volume > 0.02) {
+            snd.volume -= 0.02;
+        } else {
+            snd.pause();
+            snd.currentTime = 0;
+            clearInterval(fadeOut);
+        }
+    }, 80);
+}
+// === ЗВУК EVA: ДЫХАНИЕ И ПРИГЛУШЕНИЕ МУЗЫКИ ===
+
+function fadeOutMainMusic() {
+    let fadeOut = setInterval(() => {
+        if (music.volume > 0.02) {
+            music.volume -= 0.02;
+        } else {
+            music.volume = 0;
+            music.pause();
+            clearInterval(fadeOut);
+        }
+    }, 100);
+}
+
+
+function stopBreathingAudio() {
+    if (!breathingAudio) return;
+
+    const snd = breathingAudio;
+    breathingAudio = null;
+
+    let fadeOut = setInterval(() => {
+        if (snd.volume > 0.02) {
+            snd.volume -= 0.02;
+        } else {
+            snd.pause();
+            snd.currentTime = 0;
+            clearInterval(fadeOut);
+        }
+    }, 80);
+}
+function startEVAMode() {
+    hideScenePanel();
+    // Сразу прячем фон до того, как он успеет мелькнуть
+    bg.style.transition = 'none';
+    bg.style.opacity = '0';
+    bg.style.backgroundImage = 'none';
+    bg.style.backgroundColor = 'black';
+
+    // Убираем кнопки
+    choices.innerHTML = "";
+    choices.style.opacity = '0';
+
+    // Показываем чёрный экран и текст
+    setTimeout(() => {
+        bg.style.opacity = '1';
+        gameContainer.style.opacity = '1';
+        
+    }, 50);
+
+    // Плавно гасим основную музыку
+    let fadeOutMusic = setInterval(() => {
+        if (music.volume > 0.02) {
+            music.volume -= 0.02;
+        } else {
+            music.volume = 0;
+            music.pause();
+            clearInterval(fadeOutMusic);
+        }
+    }, 100);
+
+    // Запускаем дыхание сразу — на чёрном экране
+    breathingAudio = new Audio('audio/gear_024.mp3');
+    breathingAudio.loop = true;
+    breathingAudio.volume = 0;
+    breathingAudio.play();
+
+    let fadeInBreathing = setInterval(() => {
+        if (breathingAudio.volume < 0.5) {
+            breathingAudio.volume += 0.01;
+        } else {
+            clearInterval(fadeInBreathing);
+        }
+    }, 100);
+
+    // Создаём отдельный текст для EVA (не зависит от панели)
+const evaText = document.createElement('div');
+evaText.id = 'eva-text';
+evaText.style.cssText = `
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: 'Inter', sans-serif;
+    font-weight: 300;
+    font-size: 22px;
+    line-height: 1.6;
+    letter-spacing: 2px;
+    color: white;
+    text-align: center;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
+    max-width: 800px;
+    z-index: 50;
+    opacity: 1;
+    transition: opacity 2s ease;
+`;
+document.body.appendChild(evaText);
+
+// Печатаем текст в новый элемент
+typeWriter(
+    "Люк открывается.<br>Тишина.<br>Абсолютная, оглушающая тишина.<br>Под тобой — Земля. Над тобой — всё остальное.",
+    evaText,
+    40,
+    () => {
+        // После окончания печати — показываем кнопку
+        setTimeout(() => {
+            const btn = document.createElement('button');
+            btn.textContent = 'Приступить к ремонту';
+            btn.id = 'eva-continue-btn';
+            btn.style.cssText = `
+                position: fixed;
+                top: 70%;
+                left: 50%;
+                transform: translateX(-50%);
+                padding: 15px 35px;
+                font-family: monospace;
+                font-size: 14px;
+                letter-spacing: 3px;
+                color: white;
+                background: transparent;
+                border: 1px solid rgba(255, 255, 255, 0.5);
+                cursor: pointer;
+                z-index: 60;
+                opacity: 0;
+                transition: opacity 1.5s ease, background 0.4s ease, border-color 0.4s ease;
+            `;
+            document.body.appendChild(btn);
+
+            // Плавное появление
+            setTimeout(() => { btn.style.opacity = '1'; }, 50);
+
+            btn.onmouseenter = () => {
+                btn.style.background = 'rgba(255, 255, 255, 0.08)';
+                btn.style.borderColor = 'white';
+            };
+            btn.onmouseleave = () => {
+                btn.style.background = 'transparent';
+                btn.style.borderColor = 'rgba(255, 255, 255, 0.5)';
+            };
+
+            btn.onclick = () => {
+                playClickSound();
+                
+                // Плавно прячем текст и кнопку
+                evaText.style.opacity = '0';
+                btn.style.opacity = '0';
+                
+                setTimeout(() => {
+                    evaText.remove();
+                    btn.remove();
+                    startAntennaRepair();
+                }, 1500);
+            };
+        }, 2000);
+    }
+)}
+
 
 // === МИНИ-ИГРА: ПОДДЕРЖКА СВЯЗИ ===
 

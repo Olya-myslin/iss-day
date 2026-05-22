@@ -28,7 +28,7 @@
         
         <!-- Заголовок в две строки -->
         <h1 id="start-title">ОДИН ДЕНЬ<br>НА МКС</h1>
-
+<div id="iss-container"></div>
         <!-- Стартовая кнопка остаётся в центре -->
         <div id="start-choices">
             <button id="start-button">НАЧАТЬ ПЕРВЫЙ ДЕНЬ</button>
@@ -47,6 +47,16 @@
 </div>
 
 
-    <script src="script.js"></script>
+    <script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+<script src="script.js"></script>
+<script type="module" src="iss-viewer.js"></script>
+    <script type="module" src="iss-viewer.js"></script>
 </body>
 </html>

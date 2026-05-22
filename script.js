@@ -995,6 +995,14 @@ startBtn.addEventListener('click', () => {
     let fadeInMusic = setInterval(() => {
         if (music.volume < 0.4) music.volume += 0.02;
         else clearInterval(fadeInMusic);
+        // ПЛАВНОЕ УДАЛЕНИЕ СТАНЦИИ
+    const iss = document.getElementById('iss-container');
+    if (iss) {
+        iss.style.opacity = '0'; // Сначала делаем прозрачным
+        setTimeout(() => {
+            iss.remove(); // А через 1 секунду полностью вырезаем из HTML
+        }, 2000);
+    }
     }, 200);
 
     // Fade Out первого слайда

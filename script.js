@@ -13,7 +13,13 @@ const obj1 = document.getElementById('floating-object-1');
 const obj2 = document.getElementById('floating-object-2');
 const obj3 = document.getElementById('floating-object-3');
 const allFloaters = [obj1, obj2, obj3];
-
+function clearFloaterHighlights() {
+    allFloaters.forEach(el => {
+        if (el) {
+            el.classList.remove('highlight-item');
+        }
+    });
+}
 const scenePanel = document.getElementById('scene-panel');
 // 2. ГЕНЕРАЦИЯ ЗВЕЗД 
 for (let i = 0; i < 120; i++) {
@@ -474,7 +480,7 @@ function renderScene(sceneKey) {
     // ЗАЩИТА ОТ ДВОЙНЫХ КЛИКОВ
     if (isTransitioning) return;
     isTransitioning = true;
-
+clearFloaterHighlights();
  const transitionGuard = setTimeout(() => {
         isTransitioning = false;
     }, 8000);
@@ -571,10 +577,11 @@ if (scene.isAssistSupport) {
                     if (opt.item) btn.dataset.item = opt.item;
 
                     btn.onclick = () => {
-                        playClickSound();
-                        if (opt.readiness) {
-                            updateReadiness(opt.readiness);
-                        }
+    clearFloaterHighlights();
+    playClickSound();
+    if (opt.readiness) {
+        updateReadiness(opt.readiness);
+    }
 
                         // --- ПОЛНАЯ КАЛИБРОВКА ---
                         if (opt.nextScene === 'calibration_full') {
@@ -1172,13 +1179,13 @@ document.querySelectorAll('[data-fixed-extra="true"]').forEach(el => {
         alert.classList.add('visible');
     }, 50);
 
-    // По клику — открываем красное окно
     alert.onclick = () => {
-        playClickSound();
-        alert.remove();
-        hideScenePanel();      // Гасим панель
-        showAlertMessage();
-    };
+    playClickSound();
+    clearCabinObjects();
+    alert.remove();
+    hideScenePanel();      // Гасим панель
+    showAlertMessage();
+};
 }
 
 // === КРАСНОЕ ОКНО АВАРИЙНОГО СООБЩЕНИЯ + ДИАЛОГ С ЦУПом ===
@@ -1737,14 +1744,14 @@ function runSupportEvent() {
 const alexEl = document.getElementById('support-alex');
 alexEl.innerHTML = '';
 alexEl.classList.add('visible');
-typeAlexLine(alexEl, event.alexBefore, 30);
+typeAlexLine(alexEl, event.alexBefore, 40);
 
     // Звук уведомления
     const sound = new Audio('audio/notification.mp3');
     sound.volume = 0.4;
     sound.play().catch(() => {});
 
-    // Через 2.8 сек — показываем параметр в красном
+    // Через 4.5 сек — показываем параметр в красном
     setTimeout(() => {
         const paramFill = document.getElementById('param-' + event.param);
         const paramValue = document.getElementById('value-' + event.param);
@@ -1772,7 +1779,7 @@ typeAlexLine(alexEl, event.alexBefore, 30);
 
         // Запускаем таймер
         startSupportTimer(event);
-    }, 2800);
+    }, 4500);
 }
 
 function showSupportChoices(event) {
@@ -1792,7 +1799,7 @@ function showSupportChoices(event) {
 }
 
 function startSupportTimer(event) {
-    supportState.timeLeft = 5000; // 5 секунд
+    supportState.timeLeft = 8000; // 8 секунд
     const fill = document.getElementById('support-timer-fill');
     const bar = document.getElementById('support-timer-bar');
     bar.classList.add('visible');
@@ -1847,7 +1854,7 @@ setTimeout(() => {
     alexEl.innerHTML = '';
     alexEl.classList.add('visible');
     const lineAfter = isCorrect ? event.alexAfterCorrect : event.alexAfterWrong;
-    typeAlexLine(alexEl, lineAfter, 30);
+    typeAlexLine(alexEl, lineAfter, 40);
 }, 400);
 
     // Если правильно — возвращаем параметр в норму
@@ -1875,11 +1882,11 @@ setTimeout(() => {
     document.getElementById('support-alert').classList.remove('visible');
     document.getElementById('support-timer-bar').classList.remove('visible');
 
-    // Переход к следующему событию через 3.5 сек
+    // Переход к следующему событию через 5.5 сек
     setTimeout(() => {
         supportState.currentEvent++;
         runSupportEvent();
-    }, 3500);
+    }, 5500);
 }
 
 function finishSupportGame() {

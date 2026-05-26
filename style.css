@@ -786,6 +786,48 @@ button:hover {
     from { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
     to   { opacity: 1; transform: translate(-50%, -50%) scale(1); }
 }
+
+/* === АЧИВКА — ПРАВЫЙ НИЖНИЙ УГОЛ === */
+.achievement-notification {
+    position: fixed;
+    bottom: 40px;
+    right: 40px;
+    padding: 13px 21px;
+    background: rgba(10, 15, 25, 0.85);
+    backdrop-filter: blur(8px);
+    border: 1px solid white;
+    font-family: monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: white;
+    z-index: 300;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.15);
+    text-align: left;
+}
+
+.achievement-notification.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.achievement-notification .achievement-title {
+    display: block;
+    font-size: 9px;
+    letter-spacing: 3px;
+    color: rgba(255, 255, 255, 0.6);
+    margin-bottom: 7px;
+}
+
+.achievement-notification .achievement-name {
+    display: block;
+    font-size: 13px;
+    letter-spacing: 4px;
+    color: white;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+}
 /* === МИНИ-ИГРА: ПОДДЕРЖКА СВЯЗИ === */
 #support-module {
     position: fixed;

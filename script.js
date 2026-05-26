@@ -477,6 +477,7 @@ const story = {
     background: 'url("images/window.png")',
     showAlarm: false,
     floatingItems: ['images/achievement.png'],
+    onEnter: showMurphyAchievement,
     options: [
         { text: "Вернуться к панели", nextScene: 'quiet_moment' }
     ]
@@ -562,7 +563,7 @@ if (scene.isAssistSupport) {
                     if (el) {
                         el.src = imgSrc;
                         el.style.display = 'block';
-                        setTimeout(() => { el.style.opacity = '1'; }, 100);
+                        el.style.opacity = '1';
                     }
                 });
                 
@@ -571,7 +572,7 @@ if (scene.isAssistSupport) {
                 if (achievementEl && scene.floatingItems.includes('images/achievement.png')) {
                     achievementEl.src = 'images/achievement.png';
                     achievementEl.style.display = 'block';
-                    setTimeout(() => { achievementEl.style.opacity = '1'; }, 100);
+                    achievementEl.style.opacity = '1';
                 }
             }
 
@@ -582,6 +583,11 @@ if (scene.isAssistSupport) {
             }
 
             typeWriter(scene.text, gameText, 30, () => {
+                // --- ЗАПУСК АЧИВКИ ---
+                if (scene.onEnter) {
+                    scene.onEnter();
+                }
+                
                 // --- ЗАПУСК АВАРИЙНОГО УВЕДОМЛЕНИЯ ---
                 if (scene.triggerAlert) {
                     setTimeout(() => {
@@ -591,6 +597,14 @@ if (scene.isAssistSupport) {
 
                 // Создаем кнопки
                 scene.options.forEach(opt => {
+                    // Пропускаем кнопку, если она скрыта
+                    if (opt.show === false) return;
+                    
+                    // Пропускаем кнопку иллюминатора в quiet_moment, если ачивку уже видели
+                    if (currentScene === 'quiet_moment' && opt.nextScene === 'window_achievement' && window.achievementViewed) {
+                        return;
+                    }
+                    
                     const btn = document.createElement('button');
                     btn.textContent = opt.text;
                     if (opt.customClass) {
@@ -1019,6 +1033,10 @@ function createHUD() {
 startBtn.addEventListener('click', () => {
     playClickSound();
     createHUD();
+    
+    // Сбрасываем флаг ачивки при новой игре
+    window.achievementViewed = false;
+    
     // Музыка
     music.volume = 0; music.play();
     let fadeInMusic = setInterval(() => {
@@ -1176,6 +1194,46 @@ document.querySelectorAll('[data-fixed-extra="true"]').forEach(el => {
         });
     }, 1500);
 }
+// === АЧИВКА — «ЗАКОН МЁРФИ» ===
+function showMurphyAchievement() {
+    // Устанавливаем флаг, что ачивку получили
+    window.achievementViewed = true;
+    
+    const achievement = document.getElementById('achievement');
+    
+    if (!achievement) {
+        console.error('[ACHIEVEMENT] Элемент #achievement не найден!');
+        return;
+    }
+
+    const notificationSound = new Audio('audio/notification.mp3');
+    notificationSound.volume = 0.5;
+    
+    achievement.innerHTML = `
+        <span class="achievement-title">🏆 АЧИВКА РАЗБЛОКИРОВАНА</span>
+        <span class="achievement-name">«Закон Мёрфи»</span>
+    `;
+    
+    console.log('[ACHIEVEMENT] Добавляем класс visible');
+    
+    // Воспроизводим звук
+    notificationSound.play().catch((err) => {
+        console.error('[ACHIEVEMENT] Ошибка звука:', err);
+    });
+    
+    // Показываем
+    achievement.classList.add('visible');
+    
+    // +1 к Readiness
+    updateReadiness(1);
+    
+    // Скрываем через 4 секунды
+    setTimeout(() => {
+        achievement.classList.remove('visible');
+        console.log('[ACHIEVEMENT] Скрыто');
+    }, 4000);
+}
+
 // === АВАРИЙНОЕ УВЕДОМЛЕНИЕ ПОД HUD ===
 function showAlertNotification() {
 
@@ -1360,31 +1418,33 @@ function startCabinMode() {
         tooltip.classList.remove('visible');
     };
 
-    // === КНОПКА ИЛЛЮМИНАТОРА ===
-    const windowBtn = document.createElement('button');
-    windowBtn.textContent = 'Посмотреть\nв иллюминатор';
-    windowBtn.classList.add('window-btn', 'cabin-window-btn');
-    layer.appendChild(windowBtn);
+    // === КНОПКА ИЛЛЮМИНАТОРА (только если ачивку ещё не видели) ===
+    if (!window.achievementViewed) {
+        const windowBtn = document.createElement('button');
+        windowBtn.textContent = 'Посмотреть\nв иллюминатор';
+        windowBtn.classList.add('window-btn', 'cabin-window-btn');
+        layer.appendChild(windowBtn);
 
-    // Плавное появление кнопки
-    setTimeout(() => {
-        windowBtn.style.opacity = '1';
-    }, 1500);
-
-    windowBtn.onclick = () => {
-        playClickSound();
-
-        // Убираем элементы каюты
-        clearCabinObjects();
-
-        // Плавный переход
-        bg.style.opacity = '0';
-        gameContainer.style.opacity = '0';
-
+        // Плавное появление кнопки
         setTimeout(() => {
-            renderScene('cabin_window');
-        }, 2000);
-    };
+            windowBtn.style.opacity = '1';
+        }, 1500);
+
+        windowBtn.onclick = () => {
+            playClickSound();
+
+            // Убираем элементы каюты
+            clearCabinObjects();
+
+            // Плавный переход
+            bg.style.opacity = '0';
+            gameContainer.style.opacity = '0';
+
+            setTimeout(() => {
+                renderScene('cabin_window');
+            }, 2000);
+        };
+    }
 
     // === АВАРИЙНОЕ УВЕДОМЛЕНИЕ ЧЕРЕЗ 35 СЕКУНД ===
     cabinAlertTimer = setTimeout(() => {

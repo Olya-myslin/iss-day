@@ -116,6 +116,44 @@ function stopTypingSound() {
 let currentScene = '';
 let cabinAlertTimer = null;
 
+// === DEBUG: Быстрый переход к любой сцене ===
+window.goToScene = function(sceneName) {
+    if (!story[sceneName]) {
+        console.error(`[DEBUG] Сцена "${sceneName}" не найдена!`);
+        console.log('[DEBUG] Доступные сцены:', Object.keys(story).join(', '));
+        return;
+    }
+    console.log(`[DEBUG] Переход к сцене: ${sceneName}`);
+
+    // Сбрасываем таймеры и состояние
+    if (cabinAlertTimer) {
+        clearTimeout(cabinAlertTimer);
+        cabinAlertTimer = null;
+    }
+    isTransitioning = false;
+    
+    // Прячем 3D модель если есть
+    const iss = document.getElementById('iss-container');
+    if (iss) {
+        iss.remove();
+    }
+    
+    // Инициализируем HUD если нет
+    if (!document.getElementById('hud-status')) {
+        createHUD();
+    }
+    
+    // Переходим к сцене
+    renderScene(sceneName);
+};
+
+// Примеры использования в консоли:
+// goToScene('antenna_repair_start') - мини-игра починки антенны
+// goToScene('cabin') - каюта
+// goToScene('window_achievement') - ачивка
+// goToScene('calibration_full') - калибровка
+// goToScene('eva_suits') - выход в космос
+
 function clearCabinObjects() {
     document.querySelectorAll('.cabin-hotspot, .cabin-tooltip, .cabin-window-btn, #cabin-layer').forEach(el => el.remove());
     if (cabinAlertTimer) {
@@ -556,14 +594,18 @@ if (scene.isAssistSupport) {
                 bg.classList.add('camera-active');
             }
 
-            // Показываем еду/предметы
+            // Показываем еду/предметы с плавным появлением
             if (scene.floatingItems) {
                 scene.floatingItems.forEach((imgSrc, index) => {
                     let el = allFloaters[index];
                     if (el) {
                         el.src = imgSrc;
                         el.style.display = 'block';
-                        el.style.opacity = '1';
+                        el.style.opacity = '0';
+                        // Плавное появление через небольшую задержку
+                        setTimeout(() => {
+                            el.style.opacity = '1';
+                        }, 300 + index * 200);
                     }
                 });
                 
@@ -572,7 +614,10 @@ if (scene.isAssistSupport) {
                 if (achievementEl && scene.floatingItems.includes('images/achievement.png')) {
                     achievementEl.src = 'images/achievement.png';
                     achievementEl.style.display = 'block';
-                    achievementEl.style.opacity = '1';
+                    achievementEl.style.opacity = '0';
+                    setTimeout(() => {
+                        achievementEl.style.opacity = '1';
+                    }, 500);
                 }
             }
 
@@ -581,7 +626,7 @@ if (scene.isAssistSupport) {
                 startCabinMode();
                 return;
             }
-
+            
             typeWriter(scene.text, gameText, 30, () => {
                 // --- ЗАПУСК АЧИВКИ ---
                 if (scene.onEnter) {
@@ -1106,6 +1151,26 @@ document.getElementById('s').onclick = () => {
         }, 100);
     }, 2000);
 });
+
+// === DEBUG: Обработка URL-параметров для быстрого перехода ===
+document.addEventListener('DOMContentLoaded', () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const debugScene = urlParams.get('scene');
+    const debugAntenna = urlParams.get('antenna');
+    
+    // Ждём, пока загрузится story (через небольшую задержку)
+    setTimeout(() => {
+        if (debugScene && story[debugScene]) {
+            console.log(`[DEBUG] Переход к сцене из URL: ${debugScene}`);
+            goToScene(debugScene);
+        }
+        
+        if (debugAntenna === 'true') {
+            console.log('[DEBUG] Переход к мини-игре починки антенны');
+            goToScene('antenna_repair_start');
+        }
+    }, 500);
+});
 function updateReadiness(points) {
     if (points === 0) return; // Если 0, ничего не делаем
 
@@ -1159,7 +1224,7 @@ document.querySelectorAll('[data-fixed-extra="true"]').forEach(el => {
         <div class="crew-signature">— Алекс, модуль «Кибо»</div>
         <div class="crew-choices"></div>
     `;
-    
+
     document.body.appendChild(message);
     
     // Плавное появление
@@ -1198,7 +1263,7 @@ document.querySelectorAll('[data-fixed-extra="true"]').forEach(el => {
 function showMurphyAchievement() {
     // Устанавливаем флаг, что ачивку получили
     window.achievementViewed = true;
-    
+
     const achievement = document.getElementById('achievement');
     
     if (!achievement) {
@@ -2264,11 +2329,22 @@ function startAntennaControls() {
         if (e.key === 'ArrowLeft')  antennaGame.keys.left  = true;
         if (e.key === 'ArrowRight') antennaGame.keys.right = true;
 
-        // Проверка нажатия нужной клавиши в зоне
+        // Проверка нажатия клавиш в целевой зоне
         if (antennaGame.inTargetZone && antennaGame.requiredKey) {
             const pressed = e.key === ' ' ? 'Space' : e.key;
+            
+            // Проверка нажатия на стрелки движения
+            if (e.key === 'ArrowUp' || e.key === 'ArrowDown' || 
+                e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+                // Игнорируем — это движение
+                return;
+            }
+            
             if (pressed === antennaGame.requiredKey) {
                 completeTarget();
+            } else {
+                // НАЖАТА НЕПРАВИЛЬНАЯ КНОПКА — ВЫТАЛКИВАЕМ ИЗ ЗОНЫ
+                wrongKeyPenalty();
             }
         }
     };
@@ -2338,10 +2414,10 @@ function antennaGameLoop() {
 
         updateCursorPosition();
 
-     // Проверка опасностей (только если не в процессе оглушения)
-if (!antennaGame.stunned && collidesWithDanger(antennaGame.cursorX, antennaGame.cursorY)) {
-    stunCursor();
-}
+        // Проверка опасностей
+        if (collidesWithDanger(antennaGame.cursorX, antennaGame.cursorY)) {
+            stunCursor();
+        }
 
         // Проверка цели
         checkTargetZone();
@@ -2381,6 +2457,11 @@ function stunCursor() {
     const cursor = document.getElementById('player-cursor');
     if (cursor) cursor.classList.add('stunned');
 
+    // Выходим из целевой зоны если были внутри
+    if (antennaGame.inTargetZone) {
+        exitTargetZone();
+    }
+
     // Отталкиваем курсор от центра ближайшей опасности
     const danger = findNearestDanger();
     if (danger) {
@@ -2390,30 +2471,56 @@ function stunCursor() {
         const dy = antennaGame.cursorY - cy;
         const dist = Math.sqrt(dx * dx + dy * dy) || 1;
         
-        // Вычисляем радиус опасности + радиус курсора + запас
-        const pushDistance = Math.max(danger.w, danger.h) / 2 + 15 + 5;
+        // Отталкиваем на безопасное расстояние
+        const pushDistance = Math.max(danger.w, danger.h) / 2 + 40;
         
-        // Сразу перемещаем курсор ВНЕ опасной зоны
-        antennaGame.cursorX = cx + (dx / dist) * pushDistance;
-        antennaGame.cursorY = cy + (dy / dist) * pushDistance;
-        updateCursorPosition();
+        // Запоминаем начальную позицию для плавной анимации
+        const startX = antennaGame.cursorX;
+        const startY = antennaGame.cursorY;
+        const endX = cx + (dx / dist) * pushDistance;
+        const endY = cy + (dy / dist) * pushDistance;
         
-        // Задаем скорость для продолжения отталкивания
-        const pushStrength = 15;
-        antennaGame.velocityX = (dx / dist) * pushStrength;
-        antennaGame.velocityY = (dy / dist) * pushStrength;
+        // Ограничиваем границами поля
+        const finalX = Math.max(11, Math.min(antennaGame.fieldWidth - 11, endX));
+        const finalY = Math.max(11, Math.min(antennaGame.fieldHeight - 11, endY));
+        
+        // Плавная анимация отталкивания за 150мс
+        const startTime = Date.now();
+        const duration = 150;
+        
+        function animatePush() {
+            const elapsed = Date.now() - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            
+            // Easing function (ease-out)
+            const ease = 1 - Math.pow(1 - progress, 3);
+            
+            antennaGame.cursorX = startX + (finalX - startX) * ease;
+            antennaGame.cursorY = startY + (finalY - startY) * ease;
+            updateCursorPosition();
+            
+            if (progress < 1) {
+                requestAnimationFrame(animatePush);
+            } else {
+                // Анимация завершена
+                antennaGame.velocityX = 0;
+                antennaGame.velocityY = 0;
+            }
+        }
+        
+        animatePush();
     } else {
         antennaGame.velocityX = 0;
         antennaGame.velocityY = 0;
     }
 
-    // Блокируем управление на 0.6 секунды
+    // Блокируем управление
     antennaGame.keys = { up: false, down: false, left: false, right: false };
 
     setTimeout(() => {
         antennaGame.stunned = false;
         if (cursor) cursor.classList.remove('stunned');
-    }, 600);
+    }, 800);
 }
 
 // Найти ближайшую опасность к курсору
@@ -2495,6 +2602,48 @@ function exitTargetZone() {
     }
 }
 
+function wrongKeyPenalty() {
+    // Выходим из зоны
+    exitTargetZone();
+    
+    // Вспышка экрана
+    flashRedScreen();
+    
+    // Выталкиваем курсор из целевой зоны
+    const dx = antennaGame.cursorX - antennaGame.targetX;
+    const dy = antennaGame.cursorY - antennaGame.targetY;
+    const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+    
+    // Выталкиваем за пределы радиуса цели + запас
+    const pushDistance = antennaGame.targetRadius + 50;
+    antennaGame.cursorX = antennaGame.targetX + (dx / dist) * pushDistance;
+    antennaGame.cursorY = antennaGame.targetY + (dy / dist) * pushDistance;
+    
+    // ПРОВЕРЯЕМ ПРЕПЯТСТВИЯ — если попали внутрь, ищем свободное место
+    let attempts = 0;
+    while (collidesWithObstacle(antennaGame.cursorX, antennaGame.cursorY) && attempts < 10) {
+        // Случайное направление
+        const angle = Math.random() * Math.PI * 2;
+        antennaGame.cursorX = antennaGame.targetX + Math.cos(angle) * (pushDistance + 20);
+        antennaGame.cursorY = antennaGame.targetY + Math.sin(angle) * (pushDistance + 20);
+        attempts++;
+    }
+    
+    // Ограничиваем границами поля
+    antennaGame.cursorX = Math.max(11, Math.min(antennaGame.fieldWidth - 11, antennaGame.cursorX));
+    antennaGame.cursorY = Math.max(11, Math.min(antennaGame.fieldHeight - 11, antennaGame.cursorY));
+    
+    updateCursorPosition();
+
+    // Задаем скорость для продолжения отталкивания
+    const pushStrength = 12;
+    antennaGame.velocityX = (dx / dist) * pushStrength;
+    antennaGame.velocityY = (dy / dist) * pushStrength;
+    
+    // Блокируем управление на короткое время
+    antennaGame.keys = { up: false, down: false, left: false, right: false };
+}
+
 function completeTarget() {
     if (antennaGame.keyTimerInterval) {
         clearInterval(antennaGame.keyTimerInterval);
@@ -2509,6 +2658,7 @@ function completeTarget() {
         cursor.textContent = '';
     }
 
+    // Никакого выталкивания — курсор остаётся на месте
     antennaGame.currentTarget++;
     const goalLabel = document.getElementById('current-goal');
     if (goalLabel) goalLabel.textContent = Math.min(antennaGame.currentTarget + 1, 3);

@@ -322,7 +322,7 @@ const story = {
 
 'cabin_window': {
     text: "За стеклом — бесконечная чернота и тонкая голубая линия атмосферы.<br>Земля медленно поворачивается внизу.<br>Отсюда не видно границ. Только океаны, облака и свет.",
-    background: 'url("images/wind.png")',   // ← исправил wind.png на window.png
+    background: 'url("images/wind.png")',  
     showAlarm: false,
     options: [
         { text: "Вернуться в каюту", nextScene: 'cabin' }
@@ -465,10 +465,21 @@ const story = {
     ]
 },
 'quiet_moment': {
-    text: "Ты возвращаешься к терминалу.<br>День идёт своим чередом.<br><br>(Эта сцена — заглушка, дальше будет продолжение сюжета)",
+    text: "Ты возвращаешься к терминалу.<br>День идёт своим чередом.",
     background: 'url("images/control.png")',
     showAlarm: false,
-    options: []
+    options: [
+        { text: "Посмотреть в иллюминатор", nextScene: 'window_achievement', customClass: 'window-btn-fixed', readiness: 0 }
+    ]
+},
+'window_achievement': {
+    text: "В иллюминаторе виден дрейфующий объект.<br>Гаечный ключ, случайно запущенный в свободный полет после починки антенны.<br>Очередное напоминание о том, что в космосе даже самая маленькая ошибка становится вечной.",
+    background: 'url("images/window.png")',
+    showAlarm: false,
+    floatingItems: ['images/achievement.png'],
+    options: [
+        { text: "Вернуться к панели", nextScene: 'quiet_moment' }
+    ]
 }
     };
 function renderScene(sceneKey) {
@@ -489,6 +500,8 @@ clearFloaterHighlights();
     bg.style.opacity = '0';
     gameContainer.style.opacity = '0';
     allFloaters.forEach(el => { if(el) el.style.opacity = '0'; });
+    const achievementEl = document.getElementById('floating-object-achievement');
+    if (achievementEl) achievementEl.style.opacity = '0';
     clearCabinObjects();
 
     // === НОВОЕ: убираем фиксированные кнопки прошлой сцены ===
@@ -502,6 +515,7 @@ clearFloaterHighlights();
 
         // Скрываем все объекты
         allFloaters.forEach(el => { if(el) el.style.display = 'none'; });
+        if (achievementEl) achievementEl.style.display = 'none';
 
         // === ПОКАЗЫВАЕМ ПАНЕЛЬ ===
         showScenePanel();
@@ -551,6 +565,14 @@ if (scene.isAssistSupport) {
                         setTimeout(() => { el.style.opacity = '1'; }, 100);
                     }
                 });
+                
+                // Показываем achievement-объект отдельно
+                const achievementEl = document.getElementById('floating-object-achievement');
+                if (achievementEl && scene.floatingItems.includes('images/achievement.png')) {
+                    achievementEl.src = 'images/achievement.png';
+                    achievementEl.style.display = 'block';
+                    setTimeout(() => { achievementEl.style.opacity = '1'; }, 100);
+                }
             }
 
             if (scene.isCabin) {

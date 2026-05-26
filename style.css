@@ -171,6 +171,12 @@ button:hover {
     width: 600px !important;
 }
 
+.achievement-item {
+    width: 180px !important;
+    top: 40% !important;
+    left: 55% !important;
+}
+
 #floating-object-1 { animation: floatAnim1 75s infinite alternate ease-in-out; }
 #floating-object-2 { animation: floatAnim2 62s infinite alternate ease-in-out; }
 #floating-object-3 { animation: floatAnim3 69s infinite alternate ease-in-out; }

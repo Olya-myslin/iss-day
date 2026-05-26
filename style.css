@@ -1208,56 +1208,113 @@ button:hover {
 
 .antenna-field.visible-element { opacity: 1; }
 
-/* Курсор игрока */
+/* Курсор игрока — круглый с D-pad внутри */
 .player-cursor {
     position: absolute;
-    width: 22px;
-    height: 22px;
+    width: 50px;
+    height: 50px;
     border-radius: 50%;
-    background: white;
-    box-shadow: 0 0 12px rgba(255, 255, 255, 0.9);
+    background: rgba(40, 80, 60, 0.9);
+    border: 2px solid rgba(120, 200, 160, 0.8);
+    box-shadow: 
+        0 0 15px rgba(100, 200, 160, 0.6),
+        inset 0 0 10px rgba(60, 120, 100, 0.5);
     transform: translate(-50%, -50%);
-    transition: box-shadow 0.3s ease;
     z-index: 5;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    font-size: 10px;
-    font-weight: bold;
-    color: black;
-    letter-spacing: 0;
     opacity: 0;
     transition: opacity 0.8s ease;
 }
 
+/* D-pad стрелки внутри курсора */
+.player-cursor::before {
+    content: '';
+    position: absolute;
+    width: 34px;
+    height: 34px;
+    background: 
+        linear-gradient(to right, transparent 7px, rgba(140, 180, 160, 0.5) 7px, rgba(140, 180, 160, 0.5) 9px, transparent 9px) top,
+        linear-gradient(to right, transparent 7px, rgba(140, 180, 160, 0.5) 7px, rgba(140, 180, 160, 0.5) 9px, transparent 9px) bottom,
+        linear-gradient(to bottom, transparent 7px, rgba(140, 180, 160, 0.5) 7px, rgba(140, 180, 160, 0.5) 9px, transparent 9px) left,
+        linear-gradient(to bottom, transparent 7px, rgba(140, 180, 160, 0.5) 7px, rgba(140, 180, 160, 0.5) 9px, transparent 9px) right;
+    background-size: 100% 10px, 100% 10px, 10px 100%, 10px 100%;
+    background-repeat: no-repeat;
+    background-position: center;
+    opacity: 0.7;
+}
+
+/* Круг внутри D-pad */
+.player-cursor::after {
+    content: '';
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: rgba(160, 200, 180, 0.6);
+    box-shadow: 0 0 8px rgba(140, 180, 160, 0.7);
+}
+
 .player-cursor.stunned {
-    background: #ff5555;
-    box-shadow: 0 0 20px rgba(255, 85, 85, 1);
-    animation: stun-shake 0.15s ease-in-out infinite;
+    background: rgba(140, 40, 40, 0.95);
+    border-color: rgba(220, 80, 80, 0.9);
+    box-shadow: 
+        0 0 25px rgba(200, 60, 60, 0.8),
+        inset 0 0 15px rgba(100, 30, 30, 0.6);
+    animation: stun-shake 0.08s ease-in-out infinite;
 }
 
 @keyframes stun-shake {
-    0%, 100% { transform: translate(-50%, -50%) translateX(0); }
-    25%      { transform: translate(-50%, -50%) translateX(-2px); }
-    75%      { transform: translate(-50%, -50%) translateX(2px); }
+    0%   { transform: translate(-50%, -50%) translate(0, 0) rotate(0deg); }
+    25%  { transform: translate(-50%, -50%) translate(-2px, -2px) rotate(-2deg); }
+    50%  { transform: translate(-50%, -50%) translate(2px, -1px) rotate(2deg); }
+    75%  { transform: translate(-50%, -50%) translate(-1px, 2px) rotate(-1deg); }
+    100% { transform: translate(-50%, -50%) translate(1px, 1px) rotate(1deg); }
 }
 
 .player-cursor.in-zone {
-    background: #7dff7d;
-    box-shadow: 0 0 20px rgba(125, 255, 125, 1);
-    color: black;
+    background: rgba(50, 100, 70, 0.95);
+    border-color: rgba(140, 220, 180, 0.95);
+    box-shadow: 
+        0 0 25px rgba(120, 220, 180, 0.8),
+        inset 0 0 15px rgba(70, 140, 110, 0.6);
 }
 
-/* Препятствия — крупные бирюзовые блоки */
+/* Текст клавиши внутри курсора */
+.player-cursor > span {
+    position: absolute;
+    font-family: monospace;
+    font-size: 11px;
+    font-weight: bold;
+    letter-spacing: 1px;
+    color: rgba(200, 240, 220, 0.95);
+    text-shadow: 0 0 6px rgba(140, 200, 180, 0.9);
+    pointer-events: none;
+    z-index: 6;
+}
+
+/* Препятствия — тёмные бирюзовые блоки с детализированными углами */
 .obstacle {
     position: absolute;
     background: linear-gradient(135deg, 
-        rgba(60, 110, 130, 0.45) 0%, 
-        rgba(40, 80, 100, 0.55) 100%);
-    border: 2px solid rgba(120, 200, 220, 0.7);
+        rgba(30, 60, 60, 0.9) 0%, 
+        rgba(20, 45, 45, 0.95) 100%);
+    border: 1.5px solid rgba(80, 140, 140, 0.6);
     box-shadow: 
-        inset 0 0 15px rgba(100, 180, 200, 0.2),
-        0 0 8px rgba(100, 180, 200, 0.3);
+        inset 0 0 20px rgba(40, 80, 80, 0.4),
+        0 0 10px rgba(60, 120, 120, 0.25);
+}
+
+/* Уголки на препятствиях */
+.obstacle::before,
+.obstacle::after {
+    content: '';
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    border: 2px solid rgba(140, 180, 160, 0.7);
 }
 
 .obstacle::before {
@@ -1273,25 +1330,24 @@ button:hover {
     border-left: none;
     border-top: none;
 }
-/* Опасные зоны — красные плитки */
+/* Опасные зоны — красные/коричневые плитки с молнией */
 .danger-zone {
     position: absolute;
     background: linear-gradient(135deg,
-        rgba(140, 40, 40, 0.55) 0%,
-        rgba(100, 25, 25, 0.7) 100%);
-    border: 2px solid rgba(255, 80, 80, 0.9);
+        rgba(100, 35, 30, 0.9) 0%,
+        rgba(70, 25, 20, 0.95) 100%);
+    border: 2px solid rgba(200, 80, 60, 0.85);
     box-shadow:
-        inset 0 0 20px rgba(255, 50, 50, 0.4),
-        0 0 12px rgba(255, 50, 50, 0.5);
+        inset 0 0 25px rgba(200, 60, 40, 0.5),
+        0 0 15px rgba(200, 60, 40, 0.4);
     animation: danger-pulse 1.8s ease-in-out infinite;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 28px;
-    color: rgba(255, 255, 255, 0.9);
-    text-shadow: 0 0 8px rgba(255, 100, 100, 1);
+    font-size: 32px;
+    color: rgba(255, 220, 200, 0.95);
+    text-shadow: 0 0 12px rgba(255, 120, 80, 1);
 }
-
 
 /* Молния внутри опасной зоны */
 .danger-zone::before {
@@ -1303,8 +1359,8 @@ button:hover {
 .danger-zone::after {
     content: '';
     position: absolute;
-    inset: 0;
-    border: 2px solid rgba(255, 80, 80, 0.5);
+    inset: -2px;
+    border: 2px solid rgba(220, 100, 80, 0.5);
     pointer-events: none;
 }
 
@@ -1321,18 +1377,41 @@ button:hover {
     }
 }
 
-/* Целевая зона — пульсирующий круг */
+/* Целевая зона — зелёный круг как в Prey */
 .target-zone {
     position: absolute;
     border-radius: 50%;
-    background: rgba(125, 255, 125, 0.2);
-    border: 2px solid rgba(125, 255, 125, 0.7);
+    background: rgba(40, 100, 70, 0.25);
+    border: 2.5px solid rgba(100, 200, 160, 0.75);
     transform: translate(-50%, -50%);
     animation: target-pulse 1.5s ease-in-out infinite;
     display: flex;
     align-items: center;
     justify-content: center;
     z-index: 3;
+    box-shadow: 
+        0 0 20px rgba(100, 200, 160, 0.4),
+        inset 0 0 15px rgba(80, 160, 130, 0.3);
+}
+
+/* Внутреннее кольцо цели */
+.target-zone::before {
+    content: '';
+    position: absolute;
+    inset: 6px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(140, 220, 190, 0.5);
+}
+
+/* Точка в центре цели */
+.target-zone::after {
+    content: '';
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: rgba(160, 240, 210, 0.8);
+    box-shadow: 0 0 10px rgba(140, 220, 190, 0.9);
 }
 
 @keyframes target-pulse {

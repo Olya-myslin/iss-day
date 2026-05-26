@@ -1954,52 +1954,48 @@ let antennaGame = {
 
 const ANTENNA_CONFIG = {
     obstacles: [
-        // === ВЕРХНИЙ КРАЙ — препятствия вплотную к верху ===
-        { x: 0,   y: 0,   w: 180, h: 50 },   // верх-левый угол
-        { x: 250, y: 0,   w: 140, h: 70 },   // верх-центр-лево
-        { x: 460, y: 0,   w: 100, h: 90 },   // верх-центр
-        { x: 640, y: 0,   w: 120, h: 60 },   // верх-центр-право
-        { x: 820, y: 0,   w: 80,  h: 100 },  // верх-правый угол
-
-        // === ЛЕВЫЙ КРАЙ ===
-        { x: 0,   y: 130, w: 90,  h: 120 },  // лево-середина
-        { x: 0,   y: 330, w: 110, h: 80 },   // лево-низ
-
-        // === ПРАВЫЙ КРАЙ ===
-        { x: 820, y: 160, w: 80,  h: 100 },  // право-середина-верх
-        { x: 800, y: 320, w: 100, h: 90 },   // право-середина-низ
-
-        // === НИЖНИЙ КРАЙ ===
-        { x: 0,   y: 440, w: 150, h: 40 },   // низ-лево
-        { x: 200, y: 430, w: 130, h: 50 },   // низ-центр-лево
-        { x: 400, y: 440, w: 180, h: 40 },   // низ-центр
-        { x: 640, y: 430, w: 120, h: 50 },   // низ-центр-право
-
-        // === ЦЕНТРАЛЬНАЯ ЗОНА — лабиринт ===
-        { x: 180, y: 130, w: 50,  h: 130 },  // вертикальный
-        { x: 290, y: 170, w: 130, h: 50 },   // горизонтальный
-        { x: 480, y: 180, w: 60,  h: 140 },  // вертикальный высокий
-        { x: 600, y: 130, w: 50,  h: 110 },  // вертикальный
-        { x: 690, y: 200, w: 100, h: 50 },   // горизонтальный
-
-        { x: 150, y: 280, w: 120, h: 50 },   // средний-низ
-        { x: 320, y: 310, w: 60,  h: 100 },  // вертикальный
-        { x: 420, y: 340, w: 110, h: 50 },   // горизонтальный
-        { x: 580, y: 290, w: 90,  h: 60 },   // блок
-        { x: 700, y: 320, w: 70,  h: 80 }    // блок
+        // ВЕРХНИЙ ЛЕВЫЙ УГОЛ - большой блок
+        { x: 10,  y: 15,  w: 160, h: 80 },
+        
+        // ВЕРХНИЙ ПРАВЫЙ УГОЛ
+        { x: 750, y: 15,  w: 80,  h: 40 },
+        { x: 850, y: 80,  w: 120, h: 120 },
+        
+        // ЛЕВАЯ СТОРОНА
+        { x: 15,  y: 180, w: 70,  h: 220 },
+        
+        // ЦЕНТР - вертикальные блоки
+        { x: 280, y: 140, w: 90,  h: 160 },
+        { x: 430, y: 180, w: 110, h: 40 },
+        { x: 460, y: 260, w: 50,  h: 140 },
+        
+        // ПРАВАЯ СТОРОНА - высокий вертикальный
+        { x: 620, y: 130, w: 60,  h: 260 },
+        
+        // НИЖНИЙ ЦЕНТР
+        { x: 360, y: 350, w: 50,  h: 110 },
+        { x: 520, y: 360, w: 70,  h: 70 },
+        { x: 700, y: 380, w: 60,  h: 60 },
+        
+        // НИЖНИЙ ПРАВЫЙ УГОЛ - большой блок
+        { x: 790, y: 350, w: 100, h: 110 },
+        
+        // ЛЕВЫЙ НИЗ
+        { x: 180, y: 410, w: 110, h: 60 }
     ],
     dangers: [
-        { x: 120, y: 80,  w: 55,  h: 55 },   // верх-лево
-        { x: 380, y: 90,  w: 60,  h: 65 },   // верх-центр
-        { x: 560, y: 70,  w: 55,  h: 60 },   // верх-право
-        { x: 250, y: 260, w: 55,  h: 55 },   // центр-лево
-        { x: 540, y: 380, w: 55,  h: 55 },   // центр-низ
-        { x: 770, y: 280, w: 50,  h: 55 }    // право
+        { x: 130, y: 40,  w: 60,  h: 60 },   // верх-лево
+        { x: 360, y: 50,  w: 70,  h: 70 },   // верх-центр
+        { x: 560, y: 30,  w: 60,  h: 65 },   // верх-право
+        { x: 700, y: 60,  w: 100, h: 45 },   // верх-право-второй
+        { x: 240, y: 290, w: 60,  h: 60 },   // центр-лево
+        { x: 520, y: 400, w: 60,  h: 60 },   // центр-низ
+        { x: 190, y: 420, w: 55,  h: 55 }    // низ-лево
     ],
     targets: [
-        { x: 140, y: 195, r: 36 },  // верх-лево (между блоками)
-        { x: 870, y: 130, r: 36 },  // верх-право
-        { x: 460, y: 395, r: 36 }   // низ-центр
+        { x: 140, y: 210, r: 40 },  // лево-центр (между блоками)
+        { x: 730, y: 260, r: 40 },  // право-центр (перемещено, было 880, 150)
+        { x: 470, y: 340, r: 40 }   // низ-центр
     ],
     availableKeys: ['Space', 'Control', 'Shift']
 };
@@ -2019,8 +2015,8 @@ function startAntennaRepair() {
     // Сброс состояния
     antennaGame.timeLeft = 40;
     antennaGame.currentTarget = 0;
-    antennaGame.cursorX = 120;
-antennaGame.cursorY = 290;
+    antennaGame.cursorX = 130;
+    antennaGame.cursorY = 350;
     antennaGame.velocityX = 0;
     antennaGame.velocityY = 0;
     antennaGame.stunned = false;
@@ -2137,8 +2133,8 @@ function buildAntennaField() {
         });
     });
 
-    antennaGame.cursorX = 120 * scaleX;
-    antennaGame.cursorY = 290 * scaleY;
+    antennaGame.cursorX = 130 * scaleX;
+    antennaGame.cursorY = 350 * scaleY;
     updateCursorPosition();
 
     // Плавно показываем курсор, когда он уже на правильной позиции
@@ -2221,9 +2217,9 @@ function antennaGameLoop() {
         }
 
         // Параметры физики
-        const acceleration = 0.35;  // как быстро разгоняется
-        const friction = 0.92;      // как быстро тормозит (1 = нет трения)
-        const maxSpeed = 5.5;       // максимальная скорость
+        const acceleration = 0.45;  // как быстро разгоняется
+        const friction = 0.94;      // как быстро тормозит (ближе к 1 = меньше трения)
+        const maxSpeed = 5.8;       // максимальная скорость (уменьшил на ~10%)
 
         // Применяем ускорение
         antennaGame.velocityX += targetAccelX * acceleration;
@@ -2239,10 +2235,6 @@ function antennaGameLoop() {
             antennaGame.velocityX = (antennaGame.velocityX / speed) * maxSpeed;
             antennaGame.velocityY = (antennaGame.velocityY / speed) * maxSpeed;
         }
-
-        // Останавливаем совсем медленное движение (чтобы не было дрейфа)
-        if (Math.abs(antennaGame.velocityX) < 0.05) antennaGame.velocityX = 0;
-        if (Math.abs(antennaGame.velocityY) < 0.05) antennaGame.velocityY = 0;
 
         // Пробуем двигаться по X
         let newX = antennaGame.cursorX + antennaGame.velocityX;
@@ -2315,7 +2307,17 @@ function stunCursor() {
         const dx = antennaGame.cursorX - cx;
         const dy = antennaGame.cursorY - cy;
         const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-        const pushStrength = 8;
+        
+        // Вычисляем радиус опасности + радиус курсора + запас
+        const pushDistance = Math.max(danger.w, danger.h) / 2 + 15 + 5;
+        
+        // Сразу перемещаем курсор ВНЕ опасной зоны
+        antennaGame.cursorX = cx + (dx / dist) * pushDistance;
+        antennaGame.cursorY = cy + (dy / dist) * pushDistance;
+        updateCursorPosition();
+        
+        // Задаем скорость для продолжения отталкивания
+        const pushStrength = 15;
         antennaGame.velocityX = (dx / dist) * pushStrength;
         antennaGame.velocityY = (dy / dist) * pushStrength;
     } else {
@@ -2323,13 +2325,13 @@ function stunCursor() {
         antennaGame.velocityY = 0;
     }
 
-    // Замедление: блокируем управление на 1 секунду, но скорость гасится трением
+    // Блокируем управление на 0.6 секунды
     antennaGame.keys = { up: false, down: false, left: false, right: false };
 
     setTimeout(() => {
         antennaGame.stunned = false;
         if (cursor) cursor.classList.remove('stunned');
-    }, 1000);
+    }, 600);
 }
 
 // Найти ближайшую опасность к курсору

@@ -8,6 +8,7 @@ const choices = document.getElementById('choices');
 const startBtn = document.getElementById('start-button');
 const music = document.getElementById('bg-music');
 let readiness = 0; // Очки готовности
+
 // Находим все три летающих объекта
 const obj1 = document.getElementById('floating-object-1');
 const obj2 = document.getElementById('floating-object-2');
@@ -503,13 +504,33 @@ const story = {
     ]
 },
 'quiet_moment': {
-    text: "Ты возвращаешься к терминалу.<br>День идёт своим чередом.",
+    text: "Ты возвращаешься к терминалу.<br>Первый день на станции пролетел незаметно.<br>Дежурство окончено. Разрешают вернуться в каюту.",
     background: 'url("images/control.png")',
     showAlarm: false,
     options: [
-        { text: "Посмотреть в иллюминатор", nextScene: 'window_achievement', customClass: 'window-btn-fixed', readiness: 0 }
+        { text: "Вернуться в каюту", nextScene: 'cabin_after_eva' },
+        { text: "Посмотреть в иллюминатор", nextScene: 'window_achievement', customClass: 'window-btn-fixed' }
     ]
 },
+
+'cabin_after_eva': {
+    text: "Смена подошла к концу.<br>Но перед тем как лечь,<br>ты можешь сделать заметку в своём дневнике.",
+    background: 'url("images/curiosity.png")',
+    showAlarm: false,
+    options: [
+        { text: "Сделать заметку", nextScene: 'cabin_journal' }
+    ]
+},
+
+'cabin_journal': {
+    text: "Ты открываешь личный дневник.<br>Последняя запись датирована Землёй.<br>Сегодня — первый день экспедиции.<br>Что ты напишешь?",
+    background: 'url("images/herospace.png")',
+    showAlarm: false,
+    options: [
+        { text: "Записать впечатления", customHandler: 'openTablet' }
+    ]
+},
+
 'window_achievement': {
     text: "В иллюминаторе виден дрейфующий объект.<br>Гаечный ключ, случайно запущенный в свободный полет после починки антенны.<br>Очередное напоминание о том, что в космосе даже самая маленькая ошибка становится вечной.",
     background: 'url("images/window.png")',
@@ -627,6 +648,13 @@ if (scene.isAssistSupport) {
                 return;
             }
             
+            // Для сцен cabin_after_eva и cabin_journal показываем панель + hotspots
+            if (sceneKey === 'cabin_after_eva' || sceneKey === 'cabin_journal') {
+                showScenePanel();
+                startCabinHotspots(sceneKey);
+            }
+            
+            // Печатаем текст (не для планшета)
             typeWriter(scene.text, gameText, 30, () => {
                 // --- ЗАПУСК АЧИВКИ ---
                 if (scene.onEnter) {
@@ -663,6 +691,17 @@ if (scene.isAssistSupport) {
     if (opt.readiness) {
         updateReadiness(opt.readiness);
     }
+
+                        // --- ОТКРЫТЬ ПЛАНШЕТ ---
+                        if (opt.customHandler === 'openTablet') {
+                            // Скрываем панель с задержкой
+                            hideScenePanel();
+                            // Планшет появляется через 600мс
+                            setTimeout(() => {
+                                startTabletMode();
+                            }, 600);
+                            return;
+                        }
 
                         // --- ПОЛНАЯ КАЛИБРОВКА ---
                         if (opt.nextScene === 'calibration_full') {
@@ -1158,10 +1197,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const debugScene = urlParams.get('scene');
     const debugAntenna = urlParams.get('antenna');
     
-    // Ждём, пока загрузится story (через небольшую задержку)
+    // Ждём полной загрузки страницы и определения story
     setTimeout(() => {
         if (debugScene && story[debugScene]) {
             console.log(`[DEBUG] Переход к сцене из URL: ${debugScene}`);
+            // Сбрасываем флаг создания заметки
+            isNewNoteCreated = false;
             goToScene(debugScene);
         }
         
@@ -1169,7 +1210,7 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log('[DEBUG] Переход к мини-игре починки антенны');
             goToScene('antenna_repair_start');
         }
-    }, 500);
+    }, 2000);
 });
 function updateReadiness(points) {
     if (points === 0) return; // Если 0, ничего не делаем
@@ -1483,8 +1524,34 @@ function startCabinMode() {
         tooltip.classList.remove('visible');
     };
 
-    // === КНОПКА ИЛЛЮМИНАТОРА (только если ачивку ещё не видели) ===
-    if (!window.achievementViewed) {
+    // === ЗОНА ПЛАНШЕТА ДЛЯ ЗАМЕТОК И СКЕТЧЕЙ ===
+    const tabletZone = document.createElement('div');
+    tabletZone.classList.add('cabin-hotspot', 'hotspot-tablet');
+    layer.appendChild(tabletZone);
+
+    // Tooltip для планшета
+    tabletZone.onmouseenter = () => {
+        tooltip.innerHTML = 
+            "Личный планшет.<br>" +
+            "Прикреплён к полке —<br>" +
+            "на МКС всё должно быть зафиксировано.<br>" +
+            "Дневник наблюдений,<br>" +
+            "эскизы скафандра<br>" +
+            "и карта звёздного неба.";
+        tooltip.classList.add('visible');
+    };
+
+    tabletZone.onmousemove = (e) => {
+        tooltip.style.left = (e.clientX + 20) + 'px';
+        tooltip.style.top = (e.clientY - 80) + 'px';
+    };
+
+    tabletZone.onmouseleave = () => {
+        tooltip.classList.remove('visible');
+    };
+
+    // === КНОПКА ИЛЛЮМИНАТОРА (только если ачивку ещё не видели И мы не в сцене после EVA) ===
+    if (!window.achievementViewed && currentScene !== 'cabin_after_eva') {
         const windowBtn = document.createElement('button');
         windowBtn.textContent = 'Посмотреть\nв иллюминатор';
         windowBtn.classList.add('window-btn', 'cabin-window-btn');
@@ -1517,6 +1584,425 @@ function startCabinMode() {
             showAlertNotification();
         }
     }, 8000);
+}
+
+// === HOTSPOTS ДЛЯ cabin_after_eva (без скрытия панели) ===
+function startCabinHotspots(sceneKey) {
+    if (sceneKey !== 'cabin_after_eva') return;
+
+    // Очищаем старые элементы
+    clearCabinObjects();
+
+    // === СЛОЙ ДЛЯ ИНТЕРАКТИВНЫХ ЗОН ===
+    const layer = document.createElement('div');
+    layer.id = 'cabin-layer';
+    document.body.appendChild(layer);
+
+    // === Tooltip ===
+    const tooltip = document.createElement('div');
+    tooltip.classList.add('cabin-tooltip');
+    document.body.appendChild(tooltip);
+
+    // === ЗОНА ФИГУРКИ CURIOSITY ===
+    const curiosityZone = document.createElement('div');
+    curiosityZone.classList.add('cabin-hotspot', 'hotspot-curiosity');
+    layer.appendChild(curiosityZone);
+
+    curiosityZone.onmouseenter = () => {
+        tooltip.innerHTML = 
+            "Пластиковый марсоход размером с ладонь.<br>" +
+            "Подарок перед стартом.<br>" +
+            "Когда смотришь на него, становится легче помнить,<br>" +
+            "что космос — это не только расстояние,<br>" +
+            "но и обещание вернуться.";
+        tooltip.classList.add('visible');
+    };
+
+    curiosityZone.onmousemove = (e) => {
+        tooltip.style.left = (e.clientX + 20) + 'px';
+        tooltip.style.top = (e.clientY - 80) + 'px';
+    };
+
+    curiosityZone.onmouseleave = () => {
+        tooltip.classList.remove('visible');
+    };
+
+    // === ЗОНА ПЛАНШЕТА ===
+    const tabletZone = document.createElement('div');
+    tabletZone.classList.add('cabin-hotspot', 'hotspot-tablet');
+    layer.appendChild(tabletZone);
+
+    tabletZone.onmouseenter = () => {
+        tooltip.innerHTML = 
+            "Личный планшет.<br>" +
+            "Прикреплён к полке —<br>" +
+            "на МКС всё должно быть зафиксировано.<br>" +
+            "Дневник наблюдений,<br>" +
+            "эскизы скафандра<br>" +
+            "и карта звёздного неба.";
+        tooltip.classList.add('visible');
+    };
+
+    tabletZone.onmousemove = (e) => {
+        tooltip.style.left = (e.clientX + 20) + 'px';
+        tooltip.style.top = (e.clientY - 80) + 'px';
+    };
+
+    tabletZone.onmouseleave = () => {
+        tooltip.classList.remove('visible');
+    };
+}
+
+// === РЕЖИМ ПЛАНШЕТА ===
+const tabletNotes = [
+    {
+        id: 'earth',
+        title: '🌍 Земля',
+        content: `Последняя запись с Земли.<br><br>
+        Сегодня отлёт. Три года подготовки,<br>
+        сотни часов в симуляторе,<br>
+        и вот — ракета уже на старте.<br>
+        Чувствую странную смесь страха и волнения.<br><br>
+        Мама сказала: «Ты справишься».<br>
+        Отец молчал, но похлопал по плечу.<br>
+        Этого хватит.`
+    },
+    {
+        id: 'sketches',
+        title: '✏️ Наброски',
+        content: `<div class="tablet-sketch-container">
+            <img src="images/sketch1.png" class="tablet-sketch-image">
+            <img src="images/sketch2.png" class="tablet-sketch-image">
+            <img src="images/sketch3.png" class="tablet-sketch-image">
+        </div>`
+    },
+    {
+        id: 'diary',
+        title: '📝 Дневник',
+        content: `День подготовки №847.<br><br>
+        Снова тренировка в ЦВОК —<br>
+        центрифуга выдала 8G.<br>
+        Кайфнул, когда стало трудно дышать,<br>
+        но инструктор сказал: «ещё десять секунд».<br>
+        Выдержал.<br><br>
+        Ночью снилось, что я падаю.<br>
+        Проснулся в холодном поту.<br>
+        В космосе падения нет, но есть вечное падение<br>
+        по орбите. Замечательно.`
+    },
+    {
+        id: 'report',
+        title: '🔧 Отчёт',
+        content: `Техническая заметка #42.<br><br>
+        Проверил системы скафандра EMU-3.<br>
+        Кислородный контур в норме.<br>
+        Терморегуляция работает стабильно.<br>
+        Связь — чистая.<br><br>
+        Заметил трещину на перчатке левого рукава.<br>
+        Заменил перед выходом.<br>
+        Мелочи решают всё.`
+    }
+];
+
+// === ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ДЛЯ ВВОДА НОВОЙ ЗАМЕТКИ ===
+let newNoteTargetText = '';
+let newNoteIndex = 0;
+let newNoteNoteId = '';
+let isNoteEditorActive = false;
+
+// Философский текст для новой заметки
+const newNoteText = `Три тысячи километров до ближайшего человека.
+Тысячи километров пустоты между нами и Землёй.
+А я вдруг понял — расстояния не имеют значения.
+
+Здесь, в тишине, слышно самое главное.
+Не голос в радио, не телеметрия — а тишина.
+В этой пустоте я впервые услышал себя.
+
+Мы боимся одиночества, бежим от него.
+А оно — единственное, что делает нас настоящими.`;
+
+function openNewNoteEditor() {
+    // Если заметка уже создана — не создаём повторно
+    if (isNewNoteCreated) return;
+    isNewNoteCreated = true;
+    
+    // Находим текущий планшет
+    const module = document.getElementById('tablet-module');
+    if (!module) return;
+
+    const sidebar = module.querySelector('#tablet-sidebar');
+    const contentEl = module.querySelector('#tablet-note-content');
+    const titleEl = module.querySelector('#tablet-note-title');
+    
+    // Делаем кнопку некликабельной
+    const createBtn = sidebar.querySelector('.tablet-create-btn');
+    if (createBtn) {
+        createBtn.style.opacity = '0.4';
+        createBtn.style.cursor = 'not-allowed';
+        createBtn.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+    }
+    
+    // Создаём новую заметку
+    newNoteNoteId = 'new_note_' + Date.now();
+    newNoteTargetText = newNoteText;
+    newNoteIndex = 0;
+    isNoteEditorActive = true;
+    
+    // Добавляем в sidebar новую заметку
+    const noteBtn = document.createElement('button');
+    noteBtn.className = 'tablet-note-btn new-note-btn';
+    noteBtn.textContent = 'ПЕРВЫЙ ДЕНЬ';
+    noteBtn.dataset.noteId = newNoteNoteId;
+    noteBtn.style.opacity = '0';
+    noteBtn.style.transition = 'opacity 0.6s ease';
+    sidebar.appendChild(noteBtn);
+    
+    // Плавно показываем
+    setTimeout(() => {
+        noteBtn.style.opacity = '1';
+    }, 50);
+    
+    // Устанавливаем активную
+    sidebar.querySelectorAll('.tablet-note-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    noteBtn.classList.add('active');
+    
+    // Очищаем контент и показываем курсор
+    titleEl.textContent = 'ПЕРВЫЙ ДЕНЬ';
+    contentEl.innerHTML = '<span class="tablet-cursor"></span><span class="tablet-instruction">Начните печатать...</span>';
+    contentEl.classList.add('editing-mode');
+    
+    // Добавляем слушатель клавиатуры
+    document.addEventListener('keydown', handleNewNoteInput);
+}
+
+function handleNewNoteInput(e) {
+    if (!isNoteEditorActive) return;
+    
+    // Игнорируем специальные клавиши (Ctrl, Alt, Shift, стрелки и т.д.)
+    if (e.key.length !== 1) return;
+    
+    // Предотвращаем стандартное поведение (Enter, пробел)
+    if (e.key === ' ' || e.key === 'Enter') {
+        e.preventDefault();
+    }
+    
+    // Удаляем инструкцию при первом нажатии
+    const module = document.getElementById('tablet-module');
+    const contentEl = module.querySelector('#tablet-note-content');
+    const instruction = contentEl.querySelector('.tablet-instruction');
+    if (instruction) {
+        instruction.remove();
+    }
+    
+    // Добавляем следующую букву
+    if (newNoteIndex < newNoteTargetText.length) {
+        const nextChar = newNoteTargetText[newNoteIndex];
+        newNoteIndex++;
+        
+        const cursor = contentEl.querySelector('.tablet-cursor');
+        
+        // Вставляем букву перед курсором
+        const textNode = document.createTextNode(nextChar);
+        if (cursor) {
+            contentEl.insertBefore(textNode, cursor);
+        } else {
+            contentEl.appendChild(textNode);
+        }
+
+        // Автопрокрутка вниз
+        const mainEl = module.querySelector('#tablet-main');
+        mainEl.scrollTop = mainEl.scrollHeight;
+        
+        // Проверка на завершение
+        if (newNoteIndex >= newNoteTargetText.length) {
+            finishNewNote();
+        }
+    }
+}
+
+function finishNewNote() {
+    isNoteEditorActive = false;
+    
+    const module = document.getElementById('tablet-module');
+    const contentEl = module.querySelector('#tablet-note-content');
+    const cursor = contentEl.querySelector('.tablet-cursor');
+    if (cursor) {
+        cursor.remove();
+        contentEl.classList.remove('editing-mode');
+    }
+    
+    // Добавляем в массив заметок
+    tabletNotes.push({
+        id: newNoteNoteId,
+        title: 'ПЕРВЫЙ ДЕНЬ',
+        content: newNoteTargetText.replace(/\n/g, '<br>')
+    });
+    
+    // Убираем слушатель
+    document.removeEventListener('keydown', handleNewNoteInput);
+}
+
+function startTabletMode() {
+    // Скрываем нижнюю панель
+    hideScenePanel();
+
+    // Сбрасываем флаг создания заметки при каждом открытии планшета
+    isNewNoteCreated = false;
+
+    // Создаём модуль планшета
+    const module = document.createElement('div');
+    module.id = 'tablet-module';
+    module.innerHTML = `
+        <svg class="tablet-frame-svg" viewBox="0 0 1000 600" preserveAspectRatio="none">
+            <rect class="tablet-frame-rect" x="1" y="1" width="998" height="598"></rect>
+        </svg>
+
+        <div class="tablet-content">
+            <div class="tablet-status-bar">
+                <div class="tablet-status-left">
+                    <span class="tablet-battery">🔋 <span id="tablet-battery-percent">92%</span></span>
+                    <span class="tablet-network">🛰️ МКС</span>
+                </div>
+                <div class="tablet-status-center">
+                    <span id="tablet-time">00:00 UTC</span>
+                </div>
+                <div class="tablet-status-right">
+                    <span class="tablet-signal">📶 ●●●○○</span>
+                    <button class="tablet-close-btn" id="tablet-close">
+                        <svg viewBox="0 0 24 24" width="20" height="20">
+                            <line x1="4" y1="4" x2="20" y2="20" stroke="currentColor" stroke-width="2"/>
+                            <line x1="20" y1="4" x2="4" y2="20" stroke="currentColor" stroke-width="2"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <div class="tablet-body">
+                <div class="tablet-sidebar" id="tablet-sidebar">
+                    <!-- Заметки добавляются динамически -->
+                </div>
+                
+                <div class="tablet-main" id="tablet-main">
+                    <div class="tablet-main-title" id="tablet-note-title"></div>
+                    <div class="tablet-main-content" id="tablet-note-content"></div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(module);
+    
+    // Плавное появление планшета (замедлено)
+    setTimeout(() => {
+        module.style.opacity = '1';
+    }, 300);
+
+    // Анимация рамки
+    setTimeout(() => {
+        const rect = module.querySelector('.tablet-frame-rect');
+        rect.style.strokeDashoffset = '0';
+    }, 300);
+
+    // Заполняем sidebar заметками
+    const sidebar = module.querySelector('#tablet-sidebar');
+    
+    // Заголовок sidebar
+    const sidebarTitle = document.createElement('div');
+    sidebarTitle.className = 'tablet-sidebar-title';
+    sidebarTitle.textContent = 'ЗАМЕТКИ';
+    sidebar.appendChild(sidebarTitle);
+    
+    // Кнопка создания новой заметки
+    const createBtn = document.createElement('button');
+    createBtn.className = 'tablet-create-btn';
+    createBtn.textContent = '+ Создать заметку';
+    createBtn.style.animationDelay = '1.5s';
+    sidebar.appendChild(createBtn);
+    
+    // Клик по кнопке создания — открываем режим ввода
+    createBtn.onclick = () => {
+        playClickSound();
+        openNewNoteEditor();
+    };
+    
+    // Добавляем существующие заметки из массива
+    tabletNotes.forEach((note, index) => {
+        const noteBtn = document.createElement('button');
+        noteBtn.className = 'tablet-note-btn';
+        noteBtn.textContent = note.title;
+        noteBtn.dataset.noteId = note.id;
+        noteBtn.style.animationDelay = (1.7 + index * 0.2) + 's';
+        sidebar.appendChild(noteBtn);
+    });
+    
+    // Открываем первую заметку по умолчанию (закомментировано - теперь пусто при старте)
+    // openNote('earth');
+    
+    // Клик по заметке
+    sidebar.addEventListener('click', (e) => {
+        if (e.target.classList.contains('tablet-note-btn')) {
+            const noteId = e.target.dataset.noteId;
+            openNote(noteId);
+            
+            // Подсветка активной заметки
+            sidebar.querySelectorAll('.tablet-note-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            e.target.classList.add('active');
+        }
+    });
+    
+    // Кнопка закрытия
+    module.querySelector('#tablet-close').onclick = () => {
+        playClickSound();
+        module.style.opacity = '0';
+        setTimeout(() => {
+            module.remove();
+            renderScene('cabin_after_eva');
+        }, 800);
+    };
+    
+    // Обновление времени каждую секунду
+    const updateTabletTime = () => {
+        const now = new Date();
+        const hours = String(now.getUTCHours()).padStart(2, '0');
+        const minutes = String(now.getUTCMinutes()).padStart(2, '0');
+        const timeEl = module.querySelector('#tablet-time');
+        if (timeEl) {
+            timeEl.innerHTML = `${hours}<span class="tablet-time-colon">:</span>${minutes} UTC`;
+        }
+    };
+    updateTabletTime();
+    const timeInterval = setInterval(updateTabletTime, 1000);
+    
+    // Очистка интервала при удалении планшета
+    const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+            mutation.removedNodes.forEach((node) => {
+                if (node === module) {
+                    clearInterval(timeInterval);
+                    observer.disconnect();
+                }
+            });
+        });
+    });
+    observer.observe(document.body, { childList: true });
+}
+
+function openNote(noteId) {
+    const note = tabletNotes.find(n => n.id === noteId);
+    if (!note) return;
+    
+    const titleEl = document.getElementById('tablet-note-title');
+    const contentEl = document.getElementById('tablet-note-content');
+    
+    if (titleEl && contentEl) {
+        titleEl.textContent = note.title;
+        contentEl.innerHTML = note.content;
+    }
 }
 
 // === РЕЖИМ ВЫХОДА В КОСМОС ===

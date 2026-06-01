@@ -617,10 +617,18 @@ button:hover {
 }
 
 .hotspot-curiosity {
-    top: 54%;
+    top: 33%;
     left: 40%;
     width: 16%;
     height: 20%;
+}
+
+/* === НОВЫЙ HOTSPOT ДЛЯ ПЛАНШЕТА === */
+.hotspot-tablet {
+    top: 60%;       /* отступ сверху — подбери под твою картинку */
+    left: 39%;      /* отступ слева (сдвинул влево) */
+    width: 18%;     /* ширина прямоугольника (увеличил) */
+    height: 8%;     /* высота прямоугольника */
 }
 
 /* Кнопка иллюминатора в каюте */
@@ -1655,4 +1663,312 @@ button:hover {
 }
 .content {
   width: 100% !important;
+}
+
+/* === ПЛАНШЕТ — ЗАМЕТКИ === */
+#tablet-module {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 75%;
+    max-width: 1000px;
+    height: 70%;
+    max-height: 600px;
+    z-index: 60;
+    opacity: 0;
+    transition: opacity 0.8s ease;
+}
+
+.tablet-frame-svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+.tablet-frame-rect {
+    fill: rgba(5, 10, 20, 0);
+    stroke: white;
+    stroke-width: 1.5;
+    stroke-dasharray: 3200;
+    stroke-dashoffset: 3200;
+    filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.4));
+    transition: stroke-dashoffset 2.5s ease;
+}
+
+.tablet-content {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    height: 100%;
+    padding: 20px 30px;
+    display: flex;
+    flex-direction: column;
+    backdrop-filter: blur(8px);
+    background: rgba(10, 15, 25, 0.75);
+}
+
+/* Status bar */
+.tablet-status-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 15px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    margin-bottom: 20px;
+    font-family: monospace;
+    font-size: 12px;
+    letter-spacing: 1px;
+}
+
+.tablet-status-left,
+.tablet-status-right {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+.tablet-status-center {
+    font-size: 14px;
+    letter-spacing: 2px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+}
+
+.tablet-time-colon {
+    animation: tablet-colon-blink 1s step-end infinite;
+}
+
+@keyframes tablet-colon-blink {
+    50% { opacity: 0; }
+}
+
+.tablet-battery,
+.tablet-network,
+.tablet-signal {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.tablet-status-right {
+    display: flex;
+    align-items: center;
+    position: relative;
+    padding-left: 10px;
+}
+
+.tablet-close-btn {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    color: rgba(255, 255, 255, 0.7);
+    width: 32px;
+    height: 32px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin: 0;
+    box-sizing: border-box;
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+}
+
+.tablet-close-btn svg {
+    display: block;
+}
+
+.tablet-close-btn:hover {
+    background: rgba(255, 85, 85, 0.2);
+    border-color: #ff5555;
+    color: #ff8888;
+}
+
+/* Body */
+.tablet-body {
+    flex: 1;
+    display: flex;
+    gap: 20px;
+    overflow: hidden;
+}
+
+/* Sidebar */
+.tablet-sidebar {
+    width: 220px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    overflow-y: auto;
+    border-right: 1px solid rgba(255, 255, 255, 0.15);
+    padding-right: 15px;
+}
+
+.tablet-sidebar-title {
+    font-family: monospace;
+    font-size: 12px;
+    letter-spacing: 3px;
+    color: rgba(255, 255, 255, 0.5);
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.tablet-create-btn {
+    background: transparent;
+    border: 1px dashed rgba(255, 255, 255, 0.3);
+    color: rgba(255, 255, 255, 0.5);
+    padding: 10px 12px;
+    font-family: monospace;
+    font-size: 12px;
+    letter-spacing: 1px;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin: 0 0 8px 0;
+    opacity: 0;
+    animation: fadeInButton 0.6s ease forwards;
+}
+
+.tablet-create-btn:hover {
+    background: rgba(125, 255, 125, 0.1);
+    border-color: rgba(125, 255, 125, 0.6);
+    color: rgba(125, 255, 125, 0.9);
+}
+
+.tablet-note-btn {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: rgba(255, 255, 255, 0.6);
+    padding: 10px 12px;
+    font-family: monospace;
+    font-size: 12px;
+    letter-spacing: 1px;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin: 0;
+    opacity: 0;
+    animation: fadeInButton 0.6s ease forwards;
+}
+
+.tablet-note-btn:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.5);
+    color: white;
+}
+
+.tablet-note-btn.active {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: white;
+    color: white;
+}
+
+/* Main content */
+.tablet-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 20px 25px;
+    background: rgba(5, 10, 15, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    overflow-y: auto;
+}
+
+.tablet-main-title {
+    font-family: monospace;
+    font-size: 16px;
+    letter-spacing: 3px;
+    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.tablet-main-content {
+    font-family: monospace;
+    font-size: 13px;
+    line-height: 1.8;
+    letter-spacing: 1px;
+    color: rgba(255, 255, 255, 0.8);
+    white-space: pre-line;
+}
+
+.tablet-main-content em {
+    color: rgba(255, 255, 255, 0.4);
+    font-style: italic;
+}
+
+/* Мигающий курсор для редактора */
+.tablet-cursor {
+    display: inline-block;
+    width: 2px;
+    height: 18px;
+    background: rgba(255, 255, 255, 0.9);
+    margin-right: 1px;
+    margin-left: 0;
+    animation: tablet-cursor-blink 1s step-end infinite;
+    vertical-align: text-bottom;
+}
+
+@keyframes tablet-cursor-blink {
+    0%, 49% { opacity: 1; }
+    50%, 100% { opacity: 0; }
+}
+
+.tablet-main-content.editing-mode {
+    caret-color: transparent;
+    cursor: text;
+}
+
+/* Инструкция для новой заметки */
+.tablet-instruction {
+    color: rgba(255, 255, 255, 0.25);
+    font-style: italic;
+    margin-left: 2px;
+}
+
+.tablet-main-content.editing-mode .tablet-instruction {
+    opacity: 0.6;
+}
+
+/* Скетчи в планшете */
+.tablet-sketch-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 10px;
+}
+
+.tablet-sketch-image {
+    max-width: 100%;
+    height: auto;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* Scrollbar styling */
+.tablet-sidebar::-webkit-scrollbar,
+.tablet-main::-webkit-scrollbar {
+    width: 6px;
+}
+
+.tablet-sidebar::-webkit-scrollbar-track,
+.tablet-main::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.tablet-sidebar::-webkit-scrollbar-thumb,
+.tablet-main::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+}
+
+.tablet-sidebar::-webkit-scrollbar-thumb:hover,
+.tablet-main::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
 }
